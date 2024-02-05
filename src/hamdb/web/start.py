@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .response import dynamic_response
-from .util import query_license, get_basic_data
+from .util import query_basic_data
 from flask import Flask, request
 
 
@@ -22,9 +22,4 @@ def query():
         except ValueError:
             pass
 
-    data = query_license(**params)
-
-    if not data:
-        app.response_class(status=404)
-
-    return get_basic_data(data)
+    return query_basic_data(**params)
