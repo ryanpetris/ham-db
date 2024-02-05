@@ -220,7 +220,7 @@ CREATE INDEX IF NOT EXISTS IX__{DB_PREFIX}sf__callsign
     ON {DB_PREFIX}sf (callsign);
 """
 
-cmd_drop_all = """
+cmd_drop_all = f"""
     DROP TABLE IF EXISTS {DB_PREFIX}am;
     DROP TABLE IF EXISTS {DB_PREFIX}co;
     DROP TABLE IF EXISTS {DB_PREFIX}en;

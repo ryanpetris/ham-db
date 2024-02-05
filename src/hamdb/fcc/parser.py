@@ -3,7 +3,6 @@
 import csv
 import io
 
-from ..common import eprint
 from typing import Iterable
 from zipfile import ZipFile
 
@@ -14,20 +13,10 @@ def parse_fcc_zip(zip_path: str):
             if not file.filename.endswith(".dat"):
                 continue
 
-            eprint(f"Processing file {file.filename}...")
-            processed = 0
-
             with zf.open(file, 'r') as f:
                 with io.TextIOWrapper(f, newline="\r\n") as w:
                     for row in parse_fcc_csv(w):
                         yield row
-
-                        processed += 1
-
-                        if processed % 100000 == 0:
-                            eprint(f"Processed {processed} records")
-
-            eprint(f"Completed file {file.filename} with {processed} records")
 
 
 def parse_fcc_csv(data: Iterable[str]):
