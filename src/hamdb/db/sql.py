@@ -87,7 +87,7 @@ class SqlConnection:
 
     def get_setting(self, name: str) -> Optional[str]:
         result = self.fetch_kw('SELECT value FROM settings WHERE name = %(name)s', name=name)
-        item = next(result, None)
+        item = next(iter(result), None)
 
         if not item:
             return None
@@ -97,6 +97,12 @@ class SqlConnection:
     def init(self):
         self._throw_if_readonly()
         self.execute(cmd_init)
+
+    def schema_exists(self, schema: str):
+        result = self.fetch_kw('SELECT true AS schema_exists FROM information_schema.schemata WHERE schema_name = %(schema)s;', schema=schema)
+        item = next(iter(result), None)
+
+        return item and item.get('schema_exists', False)
 
     def set_setting(self, name: str, value: str):
         self._throw_if_readonly()

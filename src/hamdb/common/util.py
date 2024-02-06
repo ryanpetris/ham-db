@@ -2,6 +2,10 @@
 
 import json
 import sys
+import time
+
+from datetime import datetime, timezone
+from typing import Optional
 
 
 def eprint(*args, **kwargs):
@@ -24,3 +28,26 @@ def clean_null_fields(d):
 
 def dump_json(data: any):
     return json.dumps(clean_null_fields(data), indent=4)
+
+
+def datetime_to_iso_datetime(date: datetime) -> Optional[str]:
+    if date is None:
+        return None
+
+    return date.isoformat()
+
+
+def iso_datetime_to_datetime(date: str) -> Optional[datetime]:
+    if date is None:
+        return None
+
+    return datetime.fromisoformat(date)
+
+
+def last_modified_date_to_datetime(date: str) -> Optional[datetime]:
+    if date is None:
+        return None
+
+    # Example Date: 'Sun, 04 Feb 2024 22:18:43 GMT'
+    date_parts = time.strptime(date, '%a, %d %b %Y %H:%M:%S %Z')[0:6]
+    return datetime(*date_parts, tzinfo=timezone.utc)

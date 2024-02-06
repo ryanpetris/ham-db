@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 from .records import Record
-from .queries import cmd_full_init
-from ..common.settings import DB_SCHEMA_FCC
-from ..db import SqlConnection
+from .sql_queries import cmd_full_init
+from ...common.settings import DB_SCHEMA_FCC
+from ...db import SqlConnection
 
 
 class FccAdapter:
@@ -36,7 +36,7 @@ class FccAdapter:
 
         return command
 
-    def clear_fcc_schema(self):
+    def clear_schema(self):
         self._conn.execute(cmd_full_init)
 
     def clear_data_for_identifiers(self, identifiers: list[int]):

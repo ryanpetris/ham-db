@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .response import dynamic_response
-from .util import query_basic_data
+from ..authorities import query_basic_data
 from flask import Flask, request
 
 

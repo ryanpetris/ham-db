@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from ..common.settings import DB_SCHEMA_FCC
+from ...common.settings import DB_SCHEMA_FCC
 
 cmd_full_init = f"""
 DROP SCHEMA IF EXISTS {DB_SCHEMA_FCC} CASCADE;

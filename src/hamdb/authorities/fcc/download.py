@@ -3,10 +3,10 @@
 import http.client
 import shutil
 import tempfile
-import time
 import urllib.request
 
-from datetime import datetime, timezone
+from ...common import datetime_to_iso_datetime, iso_datetime_to_datetime, last_modified_date_to_datetime
+from datetime import datetime
 from typing import IO, Iterable, Optional
 
 
@@ -39,7 +39,7 @@ class FccLicenseFile:
 
 def get_daily_files(find_after: str) -> Iterable[FccLicenseFile]:
     files: list[FccLicenseFile] = []
-    find_after_date = _parse_db_time(find_after)
+    find_after_date = iso_datetime_to_datetime(find_after)
 
     for url in AM_LICENSE_DAILY_URLS:
         file = _get_auto_cleanup_file(url, find_after_date)
@@ -63,7 +63,7 @@ def _get_auto_cleanup_file(url: str, only_after: datetime = None) -> Optional[Fc
     with urllib.request.urlopen(request) as response:
         response: http.client.HTTPResponse
 
-        last_modified = _parse_last_modified_date(response.headers.get('last-modified', None))
+        last_modified = last_modified_date_to_datetime(response.headers.get('last-modified', None))
 
         if not last_modified:
             return None
@@ -77,32 +77,4 @@ def _get_auto_cleanup_file(url: str, only_after: datetime = None) -> Optional[Fc
         shutil.copyfileobj(response, file)
         file.flush()
 
-        return FccLicenseFile(_to_db_time(last_modified), file)
-
-
-def _get_download_path_for_date(date: datetime):
-    result = date.strftime('%Y%m%d%H%M%S')
-    return f'{result}.zip'
-
-
-def _parse_db_time(date: str) -> Optional[datetime]:
-    if date is None:
-        return None
-
-    return datetime.fromisoformat(date)
-
-
-def _parse_last_modified_date(date: str) -> Optional[datetime]:
-    if date is None:
-        return None
-
-    # Example Date: 'Sun, 04 Feb 2024 22:18:43 GMT'
-    date_parts = time.strptime(date, '%a, %d %b %Y %H:%M:%S %Z')[0:6]
-    return datetime(*date_parts, tzinfo=timezone.utc)
-
-
-def _to_db_time(date: datetime) -> Optional[str]:
-    if date is None:
-        return None
-
-    return date.isoformat()
+        return FccLicenseFile(datetime_to_iso_datetime(last_modified), file)
