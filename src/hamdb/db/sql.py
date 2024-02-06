@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import psycopg2 as db
+import psycopg as db
 
 from .queries import cmd_init
 from ..common.settings import DB_NAME
@@ -27,11 +27,10 @@ class SqlConnection:
 
     def __init__(self, dbname: str = None, readonly: bool = True):
         self._readonly: bool = readonly
-        self._conn: DBAPIConnection = db.connect(database=dbname or DB_NAME, sslmode="disable")
+        self._conn: DBAPIConnection = db.connect(f'dbname={dbname or DB_NAME} sslmode=disable')
 
         if self._readonly:
-            # noinspection PyUnresolvedReferences
-            self._conn.set_session(readonly=True)
+            self._conn.read_only = True
 
     def __enter__(self):
         return self

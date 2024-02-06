@@ -52,7 +52,7 @@ setup(
     install_requires=[
         'dict2xml',
         'Flask',
-        'psycopg2'
+        'psycopg'
     ],
     package_dir={
         '': 'src'
