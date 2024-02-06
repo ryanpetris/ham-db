@@ -2,29 +2,69 @@
 
 import psycopg2 as db
 
-from .static_queries import cmd_init, cmd_drop_all
-from ..common.settings import DB_NAME, DB_PREFIX
-from ..fcc import Record
+from .queries import cmd_init
+from ..common.settings import DB_NAME
 from decimal import Decimal
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING, Iterable, Optional
 
 if TYPE_CHECKING:
     from _typeshed.dbapi import DBAPIConnection, DBAPICursor
 
 
-class SqlBase:
-    def __init__(self, dbname: str = None):
+class SqlReadOnlyException(Exception):
+    def __init__(self, message=None, *args, **kwargs):
+        if not message:
+            message = 'Attempted to run write command on read-only connection.'
+
+        # noinspection PyArgumentList
+        super().__init__(message, *args, **kwargs)
+
+
+class SqlConnection:
+    @property
+    def readonly(self) -> bool:
+        return self._readonly
+
+    def __init__(self, dbname: str = None, readonly: bool = True):
+        self._readonly: bool = readonly
         self._conn: DBAPIConnection = db.connect(database=dbname or DB_NAME, sslmode="disable")
 
+        if self._readonly:
+            # noinspection PyUnresolvedReferences
+            self._conn.set_session(readonly=True)
 
-class SqlReader(SqlBase):
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
+        if not self._readonly:
+            self.commit()
 
-    def execute(self, command: str, params: Dict[str, any]):
+    def _throw_if_readonly(self):
+        if self._readonly:
+            raise SqlReadOnlyException()
+
+    def commit(self):
+        self._throw_if_readonly()
+        self._conn.commit()
+
+    def execute(self, command: str, params: dict[str, any] = None):
+        self._throw_if_readonly()
+
+        with self._conn.cursor() as cursor:
+            cursor.execute(command, params)
+
+    def execute_kw(self, command: str, **kwargs):
+        return self.execute(command, kwargs)
+
+    def execute_many(self, command: str, params: list[dict[str, any]]):
+        self._throw_if_readonly()
+
+        with self._conn.cursor() as cursor:
+            cursor: DBAPICursor
+            cursor.executemany(command, params)
+
+    def fetch(self, command: str, params: dict[str, any] = None) -> Iterable[dict[str, any]]:
         with self._conn.cursor() as cursor:
             cursor: DBAPICursor
             cursor.execute(command, params)
@@ -42,108 +82,22 @@ class SqlReader(SqlBase):
 
                 yield data
 
-    def get_callsign_data(self, callsign: str):
-        params = {
-            'callsign': callsign
-        }
+    def fetch_kw(self, command: str, **kwargs) -> Iterable[dict[str, any]]:
+        return self.fetch(command, kwargs)
 
-        hd_record = next(iter(sorted(sorted([
-            r for r in self.execute(f'SELECT unique_system_identifier, license_status, effective_date FROM {DB_PREFIX}hd WHERE callsign = %(callsign)s', params)
-        ], key=lambda r: r["effective_date"]), key=lambda r: r["license_status"])), None)
+    def get_setting(self, name: str) -> Optional[str]:
+        result = self.fetch_kw('SELECT value FROM settings WHERE name = %(name)s', name=name)
+        item = next(result, None)
 
-        if not hd_record:
+        if not item:
             return None
 
-        return self.get_unique_identifier_data(hd_record["unique_system_identifier"])
+        return item['value']
 
-    def get_frn_data(self, frn: str):
-        params = {
-            'frn': frn
-        }
+    def init(self):
+        self._throw_if_readonly()
+        self.execute(cmd_init)
 
-        en_record = next(self.execute(f'SELECT unique_system_identifier FROM {DB_PREFIX}en WHERE frn = %(frn)s', params), None)
-
-        if not en_record:
-            return None
-
-        return self.get_unique_identifier_data(en_record["unique_system_identifier"])
-
-    def get_unique_identifier_data(self, identifier: int):
-        data = {}
-        params = {
-            'identifier': identifier
-        }
-
-        for table in Record.get_types():
-            table = table.lower()
-
-            command = f'SELECT * FROM {DB_PREFIX}{table} WHERE unique_system_identifier = %(identifier)s;'
-            rows = list(self.execute(command, params))
-
-            if not rows:
-                continue
-
-            if table in ['am', 'en', 'hd', 'sf']:
-                data[table] = rows[0]
-            else:
-                data[table] = rows
-
-        return data
-
-
-class SqlWriter(SqlBase):
-    def __init__(self, dbname: str = None, fresh: bool = False):
-        super().__init__(dbname)
-        self._insert_cache = {}
-
-        if fresh:
-            self._drop_all_tables()
-
-        self._init_database()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.commit()
-
-    def commit(self):
-        self._conn.commit()
-
-    def insert(self, record: Record):
-        command = self.get_insert_cmd(record)
-
-        with self._conn.cursor() as cursor:
-            cursor.execute(command, record.__dict__)
-
-    def insert_many(self, record: List[Record]):
-        command = self.get_insert_cmd(record[0])
-
-        with self._conn.cursor() as cursor:
-            cursor: DBAPICursor
-            cursor.executemany(command, [r.__dict__ for r in record])
-
-    def get_insert_cmd(self, record: Record):
-        command = self._insert_cache.get(record.record_def.record_type, None)
-
-        if command is None:
-            command = "INSERT INTO "
-            command += DB_PREFIX
-            command += record.record_def.record_type.lower()
-            command += " ("
-            command += str.join(", ", record.record_def.fields)
-            command += ") VALUES ("
-            command += str.join(", ", (f"%({f})s" for f in record.record_def.fields))
-            command += ");"
-
-            self._insert_cache[record.record_def.record_type] = command
-
-        return command
-
-    def _init_database(self):
-        with self._conn.cursor() as cursor:
-            cursor.execute(cmd_init)
-
-    def _drop_all_tables(self):
-        with self._conn.cursor() as cursor:
-            cursor.execute(cmd_drop_all)
+    def set_setting(self, name: str, value: str):
+        self._throw_if_readonly()
+        self.execute_kw('INSERT INTO settings (name, value) VALUES (%(name)s, %(value)s) ON CONFLICT (name) DO UPDATE SET value = EXCLUDED.value', name=name, value=value)

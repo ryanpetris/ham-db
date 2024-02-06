@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
-from ...common.settings import DB_PREFIX
+from ..common.settings import DB_SCHEMA_FCC
 
-cmd_init = f"""
-CREATE TABLE IF NOT EXISTS {DB_PREFIX}am (
+cmd_full_init = f"""
+DROP SCHEMA IF EXISTS {DB_SCHEMA_FCC} CASCADE;
+CREATE SCHEMA {DB_SCHEMA_FCC};
+
+CREATE TABLE {DB_SCHEMA_FCC}.am (
     record_type                CHAR(2)       NOT NULL,
     unique_system_identifier   NUMERIC(9, 0) NOT NULL,
     uls_file_num               VARCHAR(14)   NULL,
@@ -26,18 +29,18 @@ CREATE TABLE IF NOT EXISTS {DB_PREFIX}am (
     PRIMARY KEY (unique_system_identifier)
 );
 
-CREATE INDEX IF NOT EXISTS IX__{DB_PREFIX}am__callsign
-    ON {DB_PREFIX}am (callsign);
+CREATE INDEX IF NOT EXISTS IX__{DB_SCHEMA_FCC}__am__callsign
+    ON {DB_SCHEMA_FCC}.am (callsign);
 
-CREATE INDEX IF NOT EXISTS IX__{DB_PREFIX}am__previous_callsign
-    ON {DB_PREFIX}am (previous_callsign)
+CREATE INDEX IF NOT EXISTS IX__{DB_SCHEMA_FCC}__am__previous_callsign
+    ON {DB_SCHEMA_FCC}.am (previous_callsign)
     INCLUDE (callsign);
 
-CREATE INDEX IF NOT EXISTS IX__{DB_PREFIX}am__trustee_callsign
-    ON {DB_PREFIX}am (trustee_callsign)
+CREATE INDEX IF NOT EXISTS IX__{DB_SCHEMA_FCC}__am__trustee_callsign
+    ON {DB_SCHEMA_FCC}.am (trustee_callsign)
     INCLUDE (callsign);
 
-CREATE TABLE IF NOT EXISTS {DB_PREFIX}co (
+CREATE TABLE {DB_SCHEMA_FCC}.co (
     record_type              CHAR(2)       NOT NULL,
     unique_system_identifier NUMERIC(9, 0) NOT NULL,
     uls_file_num             VARCHAR(14)   NULL,
@@ -48,10 +51,10 @@ CREATE TABLE IF NOT EXISTS {DB_PREFIX}co (
     status_date              TIMESTAMP     NULL
 );
 
-CREATE INDEX IF NOT EXISTS IX__{DB_PREFIX}co__callsign
-    ON {DB_PREFIX}co (callsign);
+CREATE INDEX IF NOT EXISTS IX__{DB_SCHEMA_FCC}__co__callsign
+    ON {DB_SCHEMA_FCC}.co (callsign);
 
-CREATE TABLE IF NOT EXISTS {DB_PREFIX}en (
+CREATE TABLE {DB_SCHEMA_FCC}.en (
     record_type              CHAR(2)       NOT NULL,
     unique_system_identifier NUMERIC(9, 0) NOT NULL,
     uls_file_num             VARCHAR(14)   NULL,
@@ -86,13 +89,13 @@ CREATE TABLE IF NOT EXISTS {DB_PREFIX}en (
     PRIMARY KEY (unique_system_identifier)
 );
 
-CREATE INDEX IF NOT EXISTS IX__{DB_PREFIX}en__callsign
-    ON {DB_PREFIX}en (callsign);
+CREATE INDEX IF NOT EXISTS IX__{DB_SCHEMA_FCC}__en__callsign
+    ON {DB_SCHEMA_FCC}.en (callsign);
     
-CREATE INDEX IF NOT EXISTS IX__{DB_PREFIX}en__frn
-    ON {DB_PREFIX}en (frn);
+CREATE INDEX IF NOT EXISTS IX__{DB_SCHEMA_FCC}__en__frn
+    ON {DB_SCHEMA_FCC}.en (frn);
 
-CREATE TABLE IF NOT EXISTS {DB_PREFIX}hd (
+CREATE TABLE {DB_SCHEMA_FCC}.hd (
     record_type                  CHAR(2)       NOT NULL,
     unique_system_identifier     NUMERIC(9, 0) NOT NULL,
     uls_file_num                 VARCHAR(14)   NULL,
@@ -156,10 +159,10 @@ CREATE TABLE IF NOT EXISTS {DB_PREFIX}hd (
     PRIMARY KEY (unique_system_identifier)
 );
 
-CREATE INDEX IF NOT EXISTS IX__{DB_PREFIX}hd__callsign
-    ON {DB_PREFIX}hd (callsign);
+CREATE INDEX IF NOT EXISTS IX__{DB_SCHEMA_FCC}__hd__callsign
+    ON {DB_SCHEMA_FCC}.hd (callsign);
 
-CREATE TABLE IF NOT EXISTS {DB_PREFIX}hs (
+CREATE TABLE {DB_SCHEMA_FCC}.hs (
     record_type              CHAR(2)       NOT NULL,
     unique_system_identifier NUMERIC(9, 0) NOT NULL,
     uls_file_num             VARCHAR(14)   NULL,
@@ -168,10 +171,10 @@ CREATE TABLE IF NOT EXISTS {DB_PREFIX}hs (
     code                     VARCHAR(6)    NULL
 );
 
-CREATE INDEX IF NOT EXISTS IX__{DB_PREFIX}hs__callsign
-    ON {DB_PREFIX}hs (callsign);
+CREATE INDEX IF NOT EXISTS IX__{DB_SCHEMA_FCC}__hs__callsign
+    ON {DB_SCHEMA_FCC}.hs (callsign);
 
-CREATE TABLE IF NOT EXISTS {DB_PREFIX}la (
+CREATE TABLE {DB_SCHEMA_FCC}.la (
     record_type              CHAR(2)       NOT NULL,
     unique_system_identifier NUMERIC(9, 0) NOT NULL,
     callsign                 VARCHAR(10)   NULL,
@@ -182,10 +185,10 @@ CREATE TABLE IF NOT EXISTS {DB_PREFIX}la (
     action_performed         VARCHAR(1)    NULL
 );
 
-CREATE INDEX IF NOT EXISTS IX__{DB_PREFIX}la__callsign
-    ON {DB_PREFIX}la (callsign);
+CREATE INDEX IF NOT EXISTS IX__{DB_SCHEMA_FCC}__la__callsign
+    ON {DB_SCHEMA_FCC}.la (callsign);
 
-CREATE TABLE IF NOT EXISTS {DB_PREFIX}sc (
+CREATE TABLE {DB_SCHEMA_FCC}.sc (
     record_type              CHAR(2)       NOT NULL,
     unique_system_identifier NUMERIC(9, 0) NOT NULL,
     uls_file_num             VARCHAR(14)   NULL,
@@ -197,10 +200,10 @@ CREATE TABLE IF NOT EXISTS {DB_PREFIX}sc (
     status_date              TIMESTAMP     NULL
 );
 
-CREATE INDEX IF NOT EXISTS IX__{DB_PREFIX}sc__callsign
-    ON {DB_PREFIX}sc (callsign);
+CREATE INDEX IF NOT EXISTS IX__{DB_SCHEMA_FCC}__sc__callsign
+    ON {DB_SCHEMA_FCC}.sc (callsign);
 
-CREATE TABLE IF NOT EXISTS {DB_PREFIX}sf (
+CREATE TABLE {DB_SCHEMA_FCC}.sf (
     record_type              CHAR(2)       NOT NULL,
     unique_system_identifier NUMERIC(9, 0) NOT NULL,
     uls_file_num             VARCHAR(14)   NULL,
@@ -216,17 +219,6 @@ CREATE TABLE IF NOT EXISTS {DB_PREFIX}sf (
     PRIMARY KEY (unique_system_identifier)
 );
 
-CREATE INDEX IF NOT EXISTS IX__{DB_PREFIX}sf__callsign
-    ON {DB_PREFIX}sf (callsign);
-"""
-
-cmd_drop_all = f"""
-    DROP TABLE IF EXISTS {DB_PREFIX}am;
-    DROP TABLE IF EXISTS {DB_PREFIX}co;
-    DROP TABLE IF EXISTS {DB_PREFIX}en;
-    DROP TABLE IF EXISTS {DB_PREFIX}hd;
-    DROP TABLE IF EXISTS {DB_PREFIX}hs;
-    DROP TABLE IF EXISTS {DB_PREFIX}la;
-    DROP TABLE IF EXISTS {DB_PREFIX}sc;
-    DROP TABLE IF EXISTS {DB_PREFIX}sf;
+CREATE INDEX IF NOT EXISTS IX__{DB_SCHEMA_FCC}__sf__callsign
+    ON {DB_SCHEMA_FCC}.sf (callsign);
 """

@@ -3,17 +3,16 @@
 import sys
 
 from ..common import die, dump_json
-from ..db import SqlReader
+from ..db import SqlConnection
+from ..fcc import FccAdapter
 
 
 def query_main():
     if len(sys.argv) < 2:
         die("Please specify callsign to query.")
 
-    with SqlReader() as sql:
-        sql: SqlReader
-
-        data = sql.get_callsign_data(sys.argv[1])
+    with FccAdapter(SqlConnection()) as fcc:
+        data = fcc.get_callsign_data(sys.argv[1])
 
         print(dump_json(data))
 

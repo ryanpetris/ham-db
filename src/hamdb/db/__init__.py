@@ -1,3 +1,3 @@
 #!/usr/bin/env python3
 
-from .sql import SqlReader, SqlWriter
+from .sql import SqlConnection, SqlReadOnlyException

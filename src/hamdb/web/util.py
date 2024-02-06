@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 
-from ..db import SqlReader
+from ..db import SqlConnection
+from ..fcc import FccAdapter
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 
 def query_license(callsign: str = None, frn: str = None, identifier: int = None):
-    with SqlReader() as sql:
+    sql = SqlConnection()
+    with FccAdapter(sql) as fcc:
         if callsign:
-            return sql.get_callsign_data(callsign)
+            return fcc.get_callsign_data(callsign)
         elif frn:
-            return sql.get_callsign_data(frn)
+            return fcc.get_callsign_data(frn)
         elif identifier:
-            return sql.get_unique_identifier_data(identifier)
+            return fcc.get_unique_identifier_data(identifier)
 
     return None
 
@@ -85,7 +87,7 @@ def _convert_yes_no(value: Optional[str]) -> Optional[bool]:
     return None
 
 
-def _convert_operator_class(value: Optional[str]) -> Optional[List[str]]:
+def _convert_operator_class(value: Optional[str]) -> Optional[list[str]]:
     if not value:
         return None
 

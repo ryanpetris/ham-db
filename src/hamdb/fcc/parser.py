@@ -7,7 +7,7 @@ from typing import Iterable
 from zipfile import ZipFile
 
 
-def parse_fcc_zip(zip_path: str):
+def parse_fcc_zip(zip_path: str) -> Iterable[list[str]]:
     with ZipFile(zip_path, 'r') as zf:
         for file in zf.filelist:
             if not file.filename.endswith(".dat"):
@@ -19,7 +19,7 @@ def parse_fcc_zip(zip_path: str):
                         yield row
 
 
-def parse_fcc_csv(data: Iterable[str]):
+def parse_fcc_csv(data: Iterable[str]) -> Iterable[list[str]]:
     reader = csv.reader(_fcc_csv_fixer(data), dialect='unix', delimiter="|", quoting=csv.QUOTE_NONE, strict=False)
 
     for row in reader:

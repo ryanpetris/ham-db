@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from typing import Callable, Dict, List
+from typing import Callable
 
 
-def fcc_record(record_type: str, primary_key: str, fields: List[str]):
+def fcc_record(record_type: str, primary_key: str, fields: list[str]):
     def init(class_type):
         record_def = RecordDef(class_type, record_type, primary_key, list(fields))
         Record.record_map[record_def.record_type] = record_def
@@ -45,15 +45,15 @@ class RecordDef:
     def fields(self):
         return self._fields
 
-    def __init__(self, record_class: Callable, record_type: str, primary_key: str, fields: List[str]):
+    def __init__(self, record_class: Callable, record_type: str, primary_key: str, fields: list[str]):
         self._record_class: Callable = record_class
         self._record_type: str = record_type.upper()
         self._primary_key: str = primary_key
-        self._fields: List[str] = fields
+        self._fields: list[str] = fields
 
         self._record_class.record_def = self
 
-    def init_record(self, data: List[str] = None):
+    def init_record(self, data: list[str] = None):
         record = self._record_class()
 
         if data:
@@ -61,7 +61,7 @@ class RecordDef:
 
         return record
 
-    def set_record_data(self, record: 'Record', data: List[str]):
+    def set_record_data(self, record: 'Record', data: list[str]):
         field_length = len(self._fields)
         data_length = len(data)
 
@@ -74,7 +74,7 @@ class RecordDef:
 
 
 class Record:
-    record_map: Dict[str, RecordDef] = {}
+    record_map: dict[str, RecordDef] = {}
     record_def: RecordDef = None
 
     def __init__(self):
@@ -84,7 +84,7 @@ class Record:
         self.unique_system_identifier: int
 
     @staticmethod
-    def init(record_type: str, data: List[str]) -> 'Record':
+    def init(record_type: str, data: list[str]) -> 'Record':
         record_def = Record.record_map.get(record_type.upper(), None)
 
         if record_def is None:
@@ -97,7 +97,7 @@ class Record:
         return record_type.upper() in Record.record_map
 
     @staticmethod
-    def get_types() -> List[str]:
+    def get_types() -> list[str]:
         return list(Record.record_map.keys())
 
     def __repr__(self):
