@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import psycopg as db
+import psycopg
+import psycopg.conninfo
 
 from .queries import cmd_init
-from ..common.settings import DB_NAME
+from ..common.settings import DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD
 from decimal import Decimal
 from typing import TYPE_CHECKING, Iterable, Optional
 
@@ -27,7 +28,7 @@ class SqlConnection:
 
     def __init__(self, dbname: str = None, readonly: bool = True):
         self._readonly: bool = readonly
-        self._conn: DBAPIConnection = db.connect(f'dbname={dbname or DB_NAME} sslmode=disable')
+        self._conn: DBAPIConnection = psycopg.connect(_get_db_conninfo(sslmode='disable'))
 
         if self._readonly:
             self._conn.read_only = True
@@ -106,3 +107,24 @@ class SqlConnection:
     def set_setting(self, name: str, value: str):
         self._throw_if_readonly()
         self.execute_kw('INSERT INTO settings (name, value) VALUES (%(name)s, %(value)s) ON CONFLICT (name) DO UPDATE SET value = EXCLUDED.value', name=name, value=value)
+
+
+def _get_db_conninfo(**kwargs):
+    params = {
+        'dbname': DB_NAME,
+        **kwargs
+    }
+
+    if DB_HOST:
+        params['host'] = DB_HOST
+
+    if DB_PORT:
+        params['port'] = DB_PORT
+
+    if DB_USERNAME:
+        params['user'] = DB_USERNAME
+
+    if DB_PASSWORD:
+        params['password'] = DB_PASSWORD
+
+    return psycopg.conninfo.make_conninfo(**params)
