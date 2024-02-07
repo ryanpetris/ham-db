@@ -47,6 +47,7 @@ def _insert_rows(ised: IsedAdapter, rows: Iterable[dict[str, str]]):
             eprint(f"Processed {record_count} records")
 
     process_batch()
+    eprint(f"Completed license import with {record_count} records")
 
 
 def _process_full_file(sql: SqlConnection, force_download: bool = False):
@@ -60,6 +61,8 @@ def _process_full_file(sql: SqlConnection, force_download: bool = False):
 
         if not file:
             return
+
+        eprint(f"Processing full file with date {file.last_modified}...")
 
         ised.clear_schema()
         _insert_rows(ised, parse_ised_zip(file.file.name))

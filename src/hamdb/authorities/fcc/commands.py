@@ -80,6 +80,8 @@ def _process_full_file(sql: SqlConnection):
     with FccAdapter(sql) as fcc:
         file = get_full_file()
 
+        eprint(f"Processing full file with date {file.last_modified}...")
+
         fcc.clear_schema()
         _insert_rows(fcc, parse_fcc_zip(file.file.name))
         sql.set_setting(FCC_LICENSE_FILE_LAST_DATE_SETTING, file.last_modified)
