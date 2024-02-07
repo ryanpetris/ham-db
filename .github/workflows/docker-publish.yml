@@ -32,4 +32,4 @@ jobs:
       - name: Build
         run: ./docker-build.sh
       - name: Publish
-        run: ./docker-publish.sh "${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_BASENAME }}"
+        run: ./docker-push.sh "${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_BASENAME }}"
