@@ -1,4 +1,4 @@
-name: AUR Import
+name: Docker Publish
 on:
   push:
     branches:
@@ -13,7 +13,7 @@ env:
 
 jobs:
   publish:
-    name: Docker Publish
+    name: Publish
     runs-on: ubuntu-latest
     permissions:
       contents: read
