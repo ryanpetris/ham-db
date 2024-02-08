@@ -103,4 +103,4 @@ def _respond_xml(app: Flask, data):
 
 
 def _respond_html(app: Flask, data):
-    return data
+    return _respond_json(app, data)
