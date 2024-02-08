@@ -12,7 +12,7 @@ def query_basic_data(callsign: str = None):
         return None
 
     with LicensesAdapter(SqlConnection()) as licenses:
-        data = licenses.query_callsign(callsign)
+        data = licenses.query_callsign_one(callsign)
 
     return _db_to_basic_data(data)
 

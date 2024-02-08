@@ -43,3 +43,26 @@ CREATE TABLE IF NOT EXISTS {DB_SCHEMA_LICENSES}.qualifications (
 CREATE UNIQUE INDEX IF NOT EXISTS IX__{DB_SCHEMA_LICENSES}__qualifications
     ON {DB_SCHEMA_LICENSES}.qualifications (callsign, qualification);
 """
+
+cmd_license_query = f"""
+SELECT
+    l.callsign,
+    'L' AS type,
+    to_jsonb(l.*) AS data
+FROM {DB_SCHEMA_LICENSES}.licenses l
+WHERE   l.callsign = ANY(%(callsigns)s)
+UNION ALL
+SELECT
+    q.callsign,
+    'Q' AS type,
+    to_jsonb(q.*) - 'callsign' AS data
+FROM {DB_SCHEMA_LICENSES}.qualifications q
+WHERE   q.callsign = ANY(%(callsigns)s)
+UNION ALL
+SELECT
+    a.callsign,
+    'A' AS type,
+    to_jsonb(a.*) - 'callsign' AS data
+FROM {DB_SCHEMA_LICENSES}.administrators a
+WHERE   a.callsign = ANY(%(callsigns)s);
+"""

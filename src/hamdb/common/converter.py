@@ -11,7 +11,10 @@ class DataConverter(ABC):
         if not value:
             return None
 
-        return value.strftime('%Y-%m-%d')
+        if isinstance(value, date):
+            return value.strftime('%Y-%m-%d')
+
+        return value
 
     @classmethod
     def convert_entity_type(cls, value: Optional[str]) -> Optional[str]:

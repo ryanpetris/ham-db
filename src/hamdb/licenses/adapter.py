@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from .sql_queries import cmd_init
+from .sql_queries import cmd_init, cmd_license_query
 from ..common import get_known_authority_codes, get_authority
 from ..common.settings import DB_SCHEMA_LICENSES
 from ..db import SqlConnection
@@ -19,23 +19,34 @@ class LicensesAdapter:
         if not self._conn.readonly:
             self._conn.commit()
 
-    def query_callsign(self, callsign: str) -> Optional[dict[str, any]]:
-        data = self._conn.fetch_one(f'SELECT * FROM {DB_SCHEMA_LICENSES}.licenses WHERE callsign = %(callsign)s', callsign=callsign)
-
-        if not data:
+    def query_callsign(self, *args: str, **kwargs: any) -> Optional[list[dict[str, any]]]:
+        if not args:
             return None
 
-        if data['entity_type'] != 'I':
-            data['administrators'] = []
-            administrators = self._conn.fetch(f'SELECT admin_callsign FROM {DB_SCHEMA_LICENSES}.administrators WHERE callsign = %(callsign)s', callsign=callsign)
+        items = list(self._conn.fetch(cmd_license_query, callsigns=list(args)))
+        licenses = [i.get('data') for i in items if i.get('type') == 'L']
+        all_admin_callsigns = set(i.get('data').get('admin_callsign') for i in items if i.get('type') == 'A')
+        administrators = None
 
-            for item in administrators:
-                data['administrators'].append(self.query_callsign(item['admin_callsign']))
-        else:
-            qualifications = self._conn.fetch(f'SELECT qualification FROM {DB_SCHEMA_LICENSES}.qualifications WHERE callsign = %(callsign)s', callsign=callsign)
-            data['qualifications'] = [i['qualification'] for i in qualifications]
+        if all_admin_callsigns and not kwargs.get('for_admins', None):
+            administrators = self.query_callsign(*all_admin_callsigns, for_admins=True)
 
-        return data
+        for data in licenses:
+            data['qualifications'] = [i.get('data').get('qualification') for i in items if i.get('callsign') == data.get('callsign') and i.get('type') == 'Q']
+
+            if administrators:
+                admin_callsigns = [i.get('data').get('admin_callsign') for i in items if i.get('callsign') == data.get('callsign') and i.get('type') == 'A']
+                data['administrators'] = [i for i in administrators if i.get('callsign') in admin_callsigns]
+
+        return licenses
+
+    def query_callsign_one(self, callsign: str) -> Optional[dict[str, any]]:
+        result = self.query_callsign(callsign)
+
+        if not result:
+            return None
+
+        return next(iter(result), None)
 
     def repopulate(self):
         self._conn.execute(cmd_init)
