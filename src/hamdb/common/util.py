@@ -17,17 +17,28 @@ def die(*args, **kwargs):
     sys.exit(1)
 
 
-def clean_null_fields(d):
-    if isinstance(d, dict):
-        return {k: clean_null_fields(v) for k, v in d.items() if v is not None}
-    elif isinstance(d, list):
-        return [clean_null_fields(v) for v in d]
+def clean_null_fields(value):
+    if isinstance(value, dict):
+        result = {k: clean_null_fields(v) for k, v in value.items() if v is not None}
+        result = {k: v for k, v in result.items() if v is not None}
+
+        if len(result) == 0:
+            return None
+
+        return result
+
+    elif isinstance(value, list):
+        if len(value) == 0:
+            return None
+
+        return [clean_null_fields(v) for v in value]
+
     else:
-        return d
+        return value
 
 
 def dump_json(data: any):
-    return json.dumps(clean_null_fields(data), indent=4)
+    return json.dumps(clean_null_fields(data), indent=4, default=str)
 
 
 def datetime_to_iso_datetime(date: datetime) -> Optional[str]:

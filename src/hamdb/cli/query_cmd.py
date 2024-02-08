@@ -2,8 +2,8 @@
 
 import sys
 
-from ..authorities import query_basic_data
 from ..common import die, dump_json
+from ..licenses import query_basic_data
 
 
 def query_main():

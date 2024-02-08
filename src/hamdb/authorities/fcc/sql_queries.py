@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from ...common.settings import DB_SCHEMA_FCC
+from ...common.settings import DB_SCHEMA_FCC, DB_SCHEMA_LICENSES
 
 cmd_full_init = f"""
 DROP SCHEMA IF EXISTS {DB_SCHEMA_FCC} CASCADE;
@@ -221,4 +221,91 @@ CREATE TABLE {DB_SCHEMA_FCC}.sf (
 
 CREATE INDEX IF NOT EXISTS IX__{DB_SCHEMA_FCC}__sf__callsign
     ON {DB_SCHEMA_FCC}.sf (callsign);
+"""
+
+cmd_license_insert = f"""
+INSERT INTO {DB_SCHEMA_LICENSES}.licenses
+    (callsign, authority, status, entity_type, grant_date, expiration_date,
+     name_full, name_first, name_middle, name_last,
+     address_line1, address_line2, address_city, address_state, address_zip,
+     extra_data)
+SELECT
+    en.callsign,
+    'FCC' AS authority,
+    CASE UPPER(hd.license_status)
+        WHEN 'A' THEN 'A'
+        WHEN 'C' THEN 'N'
+        WHEN 'E' THEN 'N'
+        WHEN 'T' THEN 'N'
+        WHEN 'L' THEN 'P'
+        WHEN 'X' THEN 'P'
+        ELSE NULL
+    END AS status,
+    CASE UPPER(en.applicant_type_code)
+        WHEN 'I' THEN 'I'
+        WHEN 'B' THEN 'C'
+        WHEN 'G' THEN 'G'
+        WHEN 'M' THEN 'M'
+        WHEN 'R' THEN 'R'
+        ELSE NULL
+    END AS entity_type,
+    TO_DATE(hd.grant_date, 'MM/DD/YYYY') AS grant_date,
+    TO_DATE(hd.expired_date, 'MM/DD/YYYY') AS expiration_date,
+    en.entity_name AS name_full,
+    en.first_name AS name_first,
+    en.mi AS name_middle,
+    en.last_name AS name_last,
+    en.street_address AS address_line1,
+    NULL AS address_line2,
+    en.city AS address_city,
+    en.state AS address_state,
+    en.zip_code AS address_zip,
+    jsonb_build_object(
+        'frn', en.frn,
+        'licensee_id', en.licensee_id,
+        'unique_system_identifier', en.unique_system_identifier,
+        'is_convicted_felon', CASE UPPER(hd.convicted)
+            WHEN 'Y' THEN true
+            WHEN 'N' THEN false
+            ELSE NULL
+        END
+    ) AS extra_data
+FROM {DB_SCHEMA_FCC}.en en
+INNER JOIN {DB_SCHEMA_FCC}.hd hd ON hd.unique_system_identifier = en.unique_system_identifier
+LEFT OUTER JOIN {DB_SCHEMA_FCC}.am am ON am.unique_system_identifier = en.unique_system_identifier
+WHERE   UPPER(hd.license_status) IN ('A', 'L', 'X')
+ON CONFLICT (callsign) DO UPDATE
+    SET authority = EXCLUDED.authority,
+        status = EXCLUDED.status,
+        entity_type = EXCLUDED.entity_type,
+        grant_date = EXCLUDED.grant_date,
+        expiration_date = EXCLUDED.expiration_date,
+        name_first = EXCLUDED.name_first,
+        name_middle = EXCLUDED.name_middle,
+        name_last = EXCLUDED.name_last,
+        address_line1 = EXCLUDED.address_line1,
+        address_city = EXCLUDED.address_city,
+        address_state = EXCLUDED.address_state,
+        address_zip = EXCLUDED.address_zip,
+        extra_data = EXCLUDED.extra_data;
+
+INSERT INTO {DB_SCHEMA_LICENSES}.administrators
+    (callsign, admin_callsign)
+SELECT
+    am.callsign,
+    am.trustee_callsign AS admin_callsign
+FROM {DB_SCHEMA_FCC}.am
+INNER JOIN {DB_SCHEMA_LICENSES}.licenses cl ON am.callsign = cl.callsign AND am.unique_system_identifier = (cl.extra_data ->> 'unique_system_identifier')::numeric
+INNER JOIN {DB_SCHEMA_LICENSES}.licenses il ON am.trustee_callsign =  il.callsign
+ON CONFLICT (callsign, admin_callsign) DO NOTHING;
+
+INSERT INTO {DB_SCHEMA_LICENSES}.qualifications
+    (callsign, qualification)
+SELECT
+    am.callsign,
+    UPPER(am.operator_class) AS qualification
+FROM {DB_SCHEMA_FCC}.am
+INNER JOIN {DB_SCHEMA_LICENSES}.licenses l ON am.callsign = l.callsign AND am.unique_system_identifier = (l.extra_data ->> 'unique_system_identifier')::numeric
+WHERE   am.operator_class IS NOT NULL
+ON CONFLICT (callsign, qualification) DO NOTHING;
 """

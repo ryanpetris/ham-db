@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 NAME = 'hamdb'
-VERSION = '0.0.2'
+VERSION = '0.0.3'
 DESCRIPTION = 'Ham Database CLI and API'
 LONG_DESCRIPTION = 'Database of Amateur Radio Licensee Information'
 AUTHOR = 'Ryan Petris'
@@ -53,7 +53,8 @@ setup(
         'dict2xml',
         'Flask',
         'psycopg',
-        'psycopg[binary,pool]'
+        'psycopg[binary,pool]',
+        'PyYAML'
     ],
     package_dir={
         '': 'src'
