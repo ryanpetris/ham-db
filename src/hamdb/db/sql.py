@@ -52,6 +52,7 @@ class SqlConnection:
         self._throw_if_readonly()
 
         with self._conn.cursor() as cursor:
+            cursor: DBAPICursor
             cursor.execute(command, params)
 
     def execute_kw(self, command: str, **kwargs):

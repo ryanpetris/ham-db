@@ -40,13 +40,11 @@ class FccAdapter:
         self._conn.execute(cmd_full_init)
 
     def clear_data_for_identifiers(self, identifiers: list[int]):
-        params = [{'identifier': i} for i in identifiers]
-
         for table in Record.get_types():
             table = table.lower()
 
-            command = f'DELETE FROM {DB_SCHEMA_FCC}.{table} WHERE unique_system_identifier = %(identifier)s;'
-            self._conn.execute_many(command, params)
+            command = f'DELETE FROM {DB_SCHEMA_FCC}.{table} WHERE unique_system_identifier = ANY(%(identifiers)s);'
+            self._conn.execute_kw(command, identifiers=identifiers)
 
     def get_callsign_data(self, callsign: str):
         params = {
