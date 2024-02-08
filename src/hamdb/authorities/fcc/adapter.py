@@ -11,13 +11,6 @@ class FccAdapter:
         self._conn = conn
         self._insert_cache = {}
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if not self._conn.readonly:
-            self._conn.commit()
-
     def _get_insert_cmd(self, record: Record):
         command = self._insert_cache.get(record.record_def.record_type, None)
 

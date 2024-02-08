@@ -3,7 +3,7 @@
 import csv
 import io
 
-from typing import Iterable
+from typing import IO, Iterable
 from zipfile import ZipFile
 
 
@@ -29,8 +29,8 @@ ISED_CSV_HEADERS: list[str] = [
 ]
 
 
-def parse_ised_zip(zip_path: str) -> Iterable[dict[str, str]]:
-    with ZipFile(zip_path, 'r') as zf:
+def parse_ised_zip(zip_data: IO[bytes]) -> Iterable[dict[str, str]]:
+    with ZipFile(zip_data, 'r') as zf:
         for file in zf.filelist:
             if not file.filename == 'amateur_delim.txt':
                 continue

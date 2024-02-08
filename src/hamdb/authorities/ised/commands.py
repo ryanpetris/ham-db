@@ -11,7 +11,7 @@ from typing import Iterable
 ISED_LICENSE_FILE_LAST_DATE_SETTING: str = 'ised_license_file_last_date'
 
 
-def ised_import(args: list[str]):
+def run_import(args: list[str]):
     force_download = len(args) >= 1 and args[0] == 'full'
     sql = SqlConnection(readonly=False)
     sql.init()
@@ -51,22 +51,22 @@ def _insert_rows(ised: IsedAdapter, rows: Iterable[dict[str, str]]):
 
 
 def _process_full_file(sql: SqlConnection, force_download: bool = False):
-    with IsedAdapter(sql) as ised:
-        last_modified = None
+    ised = IsedAdapter(sql)
+    last_modified = None
 
-        if not force_download:
-            last_modified = sql.get_setting(ISED_LICENSE_FILE_LAST_DATE_SETTING)
+    if not force_download:
+        last_modified = sql.get_setting(ISED_LICENSE_FILE_LAST_DATE_SETTING)
 
-        file = get_full_file(last_modified)
+    file = get_full_file(last_modified)
 
-        if not file:
-            return False
+    if not file:
+        return False
 
-        eprint(f"Processing full file with date {file.last_modified}...")
+    eprint(f"Processing full file with date {file.last_modified}...")
 
-        ised.clear_schema()
-        _insert_rows(ised, parse_ised_zip(file.file.name))
-        sql.set_setting(ISED_LICENSE_FILE_LAST_DATE_SETTING, file.last_modified)
-        sql.commit()
+    ised.clear_schema()
+    _insert_rows(ised, parse_ised_zip(file.file))
+    sql.set_setting(ISED_LICENSE_FILE_LAST_DATE_SETTING, file.last_modified)
+    sql.commit()
 
     return True

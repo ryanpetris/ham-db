@@ -13,7 +13,7 @@ from typing import Iterable
 FCC_LICENSE_FILE_LAST_DATE_SETTING: str = 'fcc_license_file_last_date'
 
 
-def fcc_import(args: list[str]):
+def run_import(args: list[str]):
     full_import = len(args) >= 1 and args[0] == 'full'
     sql = SqlConnection(readonly=False)
     sql.init()
@@ -79,35 +79,35 @@ def _insert_rows(fcc: FccAdapter, rows: Iterable[list[str]]):
 
 
 def _process_full_file(sql: SqlConnection):
-    with FccAdapter(sql) as fcc:
-        file = get_full_file()
+    fcc = FccAdapter(sql)
+    file = get_full_file()
 
-        eprint(f"Processing full file with date {file.last_modified}...")
+    eprint(f"Processing full file with date {file.last_modified}...")
 
-        fcc.clear_schema()
-        _insert_rows(fcc, parse_fcc_zip(file.file.name))
-        sql.set_setting(FCC_LICENSE_FILE_LAST_DATE_SETTING, file.last_modified)
-        sql.commit()
+    fcc.clear_schema()
+    _insert_rows(fcc, parse_fcc_zip(file.file))
+    sql.set_setting(FCC_LICENSE_FILE_LAST_DATE_SETTING, file.last_modified)
+    sql.commit()
 
 
 def _process_daily_file(sql: SqlConnection):
     did_anything = False
 
-    with FccAdapter(sql) as fcc:
-        last_modified = sql.get_setting(FCC_LICENSE_FILE_LAST_DATE_SETTING)
+    fcc = FccAdapter(sql)
+    last_modified = sql.get_setting(FCC_LICENSE_FILE_LAST_DATE_SETTING)
 
-        for file in get_daily_files(last_modified):
-            eprint(f"Processing file with date {file.last_modified}...")
+    for file in get_daily_files(last_modified):
+        eprint(f"Processing file with date {file.last_modified}...")
 
-            did_anything = True
-            rows = list(parse_fcc_zip(file.file.name))
-            unique_ids = set(r[1] for r in rows)
+        did_anything = True
+        rows = list(parse_fcc_zip(file.file))
+        unique_ids = set(r[1] for r in rows)
 
-            eprint(f'Processing {len(rows)} records for {len(unique_ids)} distinct licenses...')
+        eprint(f'Processing {len(rows)} records for {len(unique_ids)} distinct licenses...')
 
-            fcc.clear_data_for_identifiers([int(i) for i in unique_ids])
-            _insert_rows(fcc, rows)
-            sql.set_setting(FCC_LICENSE_FILE_LAST_DATE_SETTING, file.last_modified)
-            sql.commit()
+        fcc.clear_data_for_identifiers([int(i) for i in unique_ids])
+        _insert_rows(fcc, rows)
+        sql.set_setting(FCC_LICENSE_FILE_LAST_DATE_SETTING, file.last_modified)
+        sql.commit()
 
     return did_anything

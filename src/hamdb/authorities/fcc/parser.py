@@ -3,12 +3,12 @@
 import csv
 import io
 
-from typing import Iterable
+from typing import IO, Iterable
 from zipfile import ZipFile
 
 
-def parse_fcc_zip(zip_path: str) -> Iterable[list[str]]:
-    with ZipFile(zip_path, 'r') as zf:
+def parse_fcc_zip(zip_data: IO[bytes]) -> Iterable[list[str]]:
+    with ZipFile(zip_data, 'r') as zf:
         for file in zf.filelist:
             if not file.filename.endswith(".dat"):
                 continue

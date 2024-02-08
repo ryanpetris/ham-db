@@ -5,6 +5,7 @@ import os
 
 from abc import ABC, abstractmethod
 from .converter import DataConverter
+from typing import Optional
 
 
 authority_cache: dict[str, 'Authority'] = {}
@@ -23,12 +24,16 @@ class Authority(ABC):
 
     @property
     @abstractmethod
-    def data_converter(self) -> type[DataConverter]:
+    def data_converter(self) -> Optional[type[DataConverter]]:
         pass
 
     @property
+    def sync_priority(self) -> Optional[int]:
+        return 0
+
+    @property
     @abstractmethod
-    def sync_sql_command(self) -> str:
+    def sync_sql_command(self) -> Optional[str]:
         pass
 
     @abstractmethod

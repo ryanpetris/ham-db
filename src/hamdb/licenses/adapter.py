@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 from .sql_queries import cmd_init, cmd_license_query
-from ..common import get_known_authority_codes, get_authority
-from ..common.settings import DB_SCHEMA_LICENSES
+from ..common import eprint, get_known_authority_codes, get_authority
 from ..db import SqlConnection
 from typing import Optional
 
@@ -51,8 +50,11 @@ class LicensesAdapter:
     def repopulate(self):
         self._conn.execute(cmd_init)
 
-        for code in get_known_authority_codes():
-            authority = get_authority(code)
+        authorities = sorted([get_authority(c) for c in get_known_authority_codes()], key=lambda c: c.sync_priority)
 
-            if authority.sync_sql_command:
-                self._conn.execute(authority.sync_sql_command)
+        for authority in authorities:
+            if not authority.sync_sql_command:
+                continue
+
+            eprint(f'Repopulating {authority.code} license data...')
+            self._conn.execute(authority.sync_sql_command)
