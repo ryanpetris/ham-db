@@ -4,9 +4,10 @@ import json
 import re
 import yaml
 
+from .exceptions import WebException
 from ..common import clean_null_fields
 from dict2xml import Converter as XmlConverter
-from flask import Flask, request
+from flask import Flask, request, Response
 from typing import Callable, Optional, Pattern
 
 
@@ -35,17 +36,27 @@ def dynamic_response(app: Flask):
         return process
 
     def process(*args):
-        response = func(*args)
+        response = Response()
+        data = None
+
+        try:
+            data = func(*args)
+        except WebException as ex:
+            response.status = ex.status_code
+            data = {
+                'error': ex.message or 'error'
+            }
+
         content_type = _get_accept_preference()
 
         if content_type == CONTENT_TYPE_JSON:
-            return _respond_json(app, response)
+            return _respond_json(response, data)
         elif content_type == CONTENT_TYPE_YAML:
-            return _respond_yaml(app, response)
+            return _respond_yaml(response, data)
         elif content_type == CONTENT_TYPE_XML:
-            return _respond_xml(app, response)
+            return _respond_xml(response, data)
         elif content_type == CONTENT_TYPE_HTML:
-            return _respond_html(app, response)
+            return _respond_html(response, data)
 
     return wrapper
 
@@ -83,24 +94,24 @@ def _get_accept_preference():
     return found_content_type or SUPPORTED_CONTENT_TYPES[0]
 
 
-def _respond_json(app: Flask, data):
-    response = app.make_response(json.dumps(clean_null_fields(data), sort_keys=True))
+def _respond_json(response: Response, data: dict[str, any]):
+    response.data = json.dumps(clean_null_fields(data), sort_keys=True)
     response.content_type = f'{CONTENT_TYPE_JSON}; charset=utf-8'
     return response
 
 
-def _respond_yaml(app: Flask, data):
-    response = app.make_response(yaml.safe_dump(clean_null_fields(data), sort_keys=True))
-    response.content_type = f'{CONTENT_TYPE_JSON}; charset=utf-8'
+def _respond_yaml(response: Response, data: dict[str, any]):
+    response.data = yaml.safe_dump(clean_null_fields(data), sort_keys=True)
+    response.content_type = f'{CONTENT_TYPE_YAML}; charset=utf-8'
     return response
 
 
-def _respond_xml(app: Flask, data):
+def _respond_xml(response: Response, data: dict[str, any]):
     converter = XmlConverter(indent=None, newlines=None)
-    response = app.make_response(converter.build(clean_null_fields(data)))
+    response.data = converter.build(clean_null_fields(data))
     response.content_type = f'{CONTENT_TYPE_XML}; charset=utf-8'
     return response
 
 
-def _respond_html(app: Flask, data):
-    return _respond_json(app, data)
+def _respond_html(response: Response, data: dict[str, any]):
+    return _respond_json(response, data)

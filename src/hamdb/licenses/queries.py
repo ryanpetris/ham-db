@@ -3,16 +3,20 @@
 import sys
 
 from .adapter import LicensesAdapter
-from ..common import DataConverter, get_authority
+from ..common import get_authority
 from ..db import SqlConnection
+from typing import Optional
 
 
-def query_basic_data(callsign: str = None):
+def query_basic_data(callsign: str = None) -> Optional[dict[str, any]]:
     if not callsign:
         return None
 
     with LicensesAdapter(SqlConnection()) as licenses:
         data = licenses.query_callsign_one(callsign)
+
+    if not data:
+        return None
 
     return _db_to_basic_data(data)
 
