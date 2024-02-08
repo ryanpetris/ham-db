@@ -2,24 +2,27 @@
 
 import sys
 
-from ..authorities.fcc import fcc_import
-from ..authorities.ised import ised_import
-from ..common import die
+from ..common import eprint, get_authority, get_known_authority_codes
+from ..licenses import repopulate_licenses
 
 
 def import_main():
-    if len(sys.argv) < 2:
-        die('Please specify authority')
+    authority_codes = get_known_authority_codes()
+    args = sys.argv[1:]
+    did_anything = False
 
-    authority = sys.argv[1]
-    args = sys.argv[2:]
+    if args and args[0].upper() in authority_codes:
+        authority_codes = [args[0].upper()]
+        args = args[1:]
 
-    if authority.lower() == 'fcc':
-        fcc_import(args)
-    elif authority.lower() == 'ised':
-        ised_import(args)
-    else:
-        die(f'Invalid authority: {authority}')
+    for authority_code in authority_codes:
+        authority = get_authority(authority_code)
+        eprint(f'Processing {authority.code} data...')
+
+        did_anything = authority.run_import(args) or did_anything
+
+    if did_anything:
+        repopulate_licenses()
 
 
 if __name__ == "__main__":

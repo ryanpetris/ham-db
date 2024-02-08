@@ -59,19 +59,3 @@ class DataConverter(ABC):
             return 'ACTION_PENDING'
 
         return None
-
-    @staticmethod
-    def get_converter_for_authority(authority: str) -> type['DataConverter']:
-        authority = authority.upper()
-
-        if authority == 'FCC':
-            from ..authorities.fcc import FccDataConverter
-
-            return FccDataConverter
-
-        if authority == 'ISED':
-            from ..authorities.ised import IsedDataConverter
-
-            return IsedDataConverter
-
-        raise Exception(f'Data converter for authority {authority} not found.')

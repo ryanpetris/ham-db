@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 from .sql_queries import cmd_init
-from ..authorities.fcc.sql_queries import cmd_license_insert as cmd_fcc_license_insert
-from ..authorities.ised.sql_queries import cmd_license_insert as cmd_ised_license_insert
+from ..common import get_known_authority_codes, get_authority
 from ..common.settings import DB_SCHEMA_LICENSES
 from ..db import SqlConnection
 from typing import Optional
@@ -41,5 +40,9 @@ class LicensesAdapter:
 
     def repopulate(self):
         self._conn.execute(cmd_init)
-        self._conn.execute(cmd_fcc_license_insert)
-        self._conn.execute(cmd_ised_license_insert)
+
+        for code in get_known_authority_codes():
+            authority = get_authority(code)
+
+            if authority.sync_sql_command:
+                self._conn.execute(authority.sync_sql_command)

@@ -16,7 +16,7 @@ def ised_import(args: list[str]):
     sql = SqlConnection(readonly=False)
     sql.init()
 
-    _process_full_file(sql, force_download=force_download)
+    return _process_full_file(sql, force_download=force_download)
 
 
 def _insert_rows(ised: IsedAdapter, rows: Iterable[dict[str, str]]):
@@ -60,7 +60,7 @@ def _process_full_file(sql: SqlConnection, force_download: bool = False):
         file = get_full_file(last_modified)
 
         if not file:
-            return
+            return False
 
         eprint(f"Processing full file with date {file.last_modified}...")
 
@@ -68,3 +68,5 @@ def _process_full_file(sql: SqlConnection, force_download: bool = False):
         _insert_rows(ised, parse_ised_zip(file.file.name))
         sql.set_setting(ISED_LICENSE_FILE_LAST_DATE_SETTING, file.last_modified)
         sql.commit()
+
+    return True

@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
-from ..licenses import LicensesAdapter
-from ..db import SqlConnection
+from ..licenses import repopulate_licenses
 
 
 def sync_main():
-    with LicensesAdapter(SqlConnection(readonly=False)) as licenses:
-        licenses.repopulate()
+    repopulate_licenses()
 
 
 if __name__ == "__main__":

@@ -17,11 +17,13 @@ def fcc_import(args: list[str]):
     full_import = len(args) >= 1 and args[0] == 'full'
     sql = SqlConnection(readonly=False)
     sql.init()
+    did_anything = False
 
     if full_import or not sql.schema_exists(DB_SCHEMA_FCC):
         _process_full_file(sql)
+        did_anything = True
 
-    _process_daily_file(sql)
+    return _process_daily_file(sql) or did_anything
 
 
 def _insert_rows(fcc: FccAdapter, rows: Iterable[list[str]]):
@@ -89,12 +91,15 @@ def _process_full_file(sql: SqlConnection):
 
 
 def _process_daily_file(sql: SqlConnection):
+    did_anything = False
+
     with FccAdapter(sql) as fcc:
         last_modified = sql.get_setting(FCC_LICENSE_FILE_LAST_DATE_SETTING)
 
         for file in get_daily_files(last_modified):
             eprint(f"Processing file with date {file.last_modified}...")
 
+            did_anything = True
             rows = list(parse_fcc_zip(file.file.name))
             unique_ids = set(r[1] for r in rows)
 
@@ -104,3 +109,5 @@ def _process_daily_file(sql: SqlConnection):
             _insert_rows(fcc, rows)
             sql.set_setting(FCC_LICENSE_FILE_LAST_DATE_SETTING, file.last_modified)
             sql.commit()
+
+    return did_anything

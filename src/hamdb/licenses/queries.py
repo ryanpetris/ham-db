@@ -3,7 +3,7 @@
 import sys
 
 from .adapter import LicensesAdapter
-from ..common import DataConverter, clean_null_fields
+from ..common import DataConverter, get_authority
 from ..db import SqlConnection
 
 
@@ -18,7 +18,7 @@ def query_basic_data(callsign: str = None):
 
 
 def _db_to_basic_data(data: dict[str, any]) -> dict[str, any]:
-    converter = DataConverter.get_converter_for_authority(data['authority'])
+    converter = get_authority(data.get('authority')).data_converter
 
     result = {
         'callsign': data.get('callsign', None),
