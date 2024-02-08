@@ -48,15 +48,12 @@ class SqlConnection:
         self._throw_if_readonly()
         self._conn.commit()
 
-    def execute(self, command: str, params: dict[str, any] = None):
+    def execute(self, command: str, **kwargs):
         self._throw_if_readonly()
 
         with self._conn.cursor() as cursor:
             cursor: DBAPICursor
-            cursor.execute(command, params)
-
-    def execute_kw(self, command: str, **kwargs):
-        return self.execute(command, kwargs)
+            cursor.execute(command, kwargs)
 
     def execute_many(self, command: str, params: list[dict[str, any]]):
         self._throw_if_readonly()
@@ -65,10 +62,10 @@ class SqlConnection:
             cursor: DBAPICursor
             cursor.executemany(command, params)
 
-    def fetch(self, command: str, params: dict[str, any] = None) -> Iterable[dict[str, any]]:
+    def fetch(self, command: str, **kwargs) -> Iterable[dict[str, any]]:
         with self._conn.cursor() as cursor:
             cursor: DBAPICursor
-            cursor.execute(command, params)
+            cursor.execute(command, kwargs)
 
             for row in cursor.fetchall():
                 data = {}
@@ -83,31 +80,28 @@ class SqlConnection:
 
                 yield data
 
-    def fetch_kw(self, command: str, **kwargs) -> Iterable[dict[str, any]]:
-        return self.fetch(command, kwargs)
+    def fetch_one(self, command: str, **kwargs) -> Optional[dict[str, any]]:
+        result = self.fetch(command, **kwargs)
+
+        return next(iter(result), None)
 
     def get_setting(self, name: str) -> Optional[str]:
-        result = self.fetch_kw('SELECT value FROM settings WHERE name = %(name)s', name=name)
-        item = next(iter(result), None)
+        result = self.fetch_one('SELECT value FROM settings WHERE name = %(name)s', name=name)
 
-        if not item:
-            return None
-
-        return item['value']
+        return result and result['value']
 
     def init(self):
         self._throw_if_readonly()
         self.execute(cmd_init)
 
     def schema_exists(self, schema: str):
-        result = self.fetch_kw('SELECT true AS schema_exists FROM information_schema.schemata WHERE schema_name = %(schema)s;', schema=schema)
-        item = next(iter(result), None)
+        result = self.fetch_one('SELECT true AS schema_exists FROM information_schema.schemata WHERE schema_name = %(schema)s;', schema=schema)
 
-        return item and item.get('schema_exists', False)
+        return result and result.get('schema_exists', False)
 
     def set_setting(self, name: str, value: str):
         self._throw_if_readonly()
-        self.execute_kw('INSERT INTO settings (name, value) VALUES (%(name)s, %(value)s) ON CONFLICT (name) DO UPDATE SET value = EXCLUDED.value', name=name, value=value)
+        self.execute('INSERT INTO settings (name, value) VALUES (%(name)s, %(value)s) ON CONFLICT (name) DO UPDATE SET value = EXCLUDED.value', name=name, value=value)
 
 
 def _get_db_conninfo(**kwargs):

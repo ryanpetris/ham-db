@@ -20,20 +20,19 @@ class LicensesAdapter:
             self._conn.commit()
 
     def query_callsign(self, callsign: str) -> Optional[dict[str, any]]:
-        result = self._conn.fetch_kw(f'SELECT * FROM {DB_SCHEMA_LICENSES}.licenses WHERE callsign = %(callsign)s', callsign=callsign)
-        data = next(iter(result), None)
+        data = self._conn.fetch_one(f'SELECT * FROM {DB_SCHEMA_LICENSES}.licenses WHERE callsign = %(callsign)s', callsign=callsign)
 
         if not data:
             return None
 
         if data['entity_type'] != 'I':
             data['administrators'] = []
-            administrators = self._conn.fetch_kw(f'SELECT admin_callsign FROM {DB_SCHEMA_LICENSES}.administrators WHERE callsign = %(callsign)s', callsign=callsign)
+            administrators = self._conn.fetch(f'SELECT admin_callsign FROM {DB_SCHEMA_LICENSES}.administrators WHERE callsign = %(callsign)s', callsign=callsign)
 
             for item in administrators:
                 data['administrators'].append(self.query_callsign(item['admin_callsign']))
         else:
-            qualifications = self._conn.fetch_kw(f'SELECT qualification FROM {DB_SCHEMA_LICENSES}.qualifications WHERE callsign = %(callsign)s', callsign=callsign)
+            qualifications = self._conn.fetch(f'SELECT qualification FROM {DB_SCHEMA_LICENSES}.qualifications WHERE callsign = %(callsign)s', callsign=callsign)
             data['qualifications'] = [i['qualification'] for i in qualifications]
 
         return data
