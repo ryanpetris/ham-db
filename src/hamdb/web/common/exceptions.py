@@ -1,47 +1,29 @@
 #!/usr/bin/env python3
 
 
-from abc import ABC, abstractmethod
 from typing import Optional
 
 
-class WebException(Exception, ABC):
+class WebException(Exception):
     @property
-    @abstractmethod
     def status_code(self) -> int:
-        pass
+        return self._code
 
     @property
-    def message(self) -> Optional[str]:
+    def message(self) -> str:
         return self._message
 
-    def __init__(self, message: Optional[str] = None):
+    def __init__(self, code: int, message: str):
         super().__init__()
-        self._message: Optional[str] = message
+        self._code = code
+        self._message: str = message
 
 
 class BadRequestException(WebException):
-    @property
-    def status_code(self) -> int:
-        return 400
-
     def __init__(self, message: Optional[str] = None):
-        super().__init__(message or 'Bad Request')
+        super().__init__(400, message or 'Bad Request')
 
 
 class NotFoundException(WebException):
-    @property
-    def status_code(self) -> int:
-        return 404
-
     def __init__(self, message: Optional[str] = None):
-        super().__init__(message or 'Not Found')
-
-
-class InternalServerErrorException(WebException):
-    @property
-    def status_code(self) -> int:
-        return 500
-
-    def __init__(self, message: Optional[str] = None):
-        super().__init__(message or 'Internal Server Error')
+        super().__init__(400, message or 'Not Found')

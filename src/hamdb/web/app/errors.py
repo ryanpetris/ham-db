@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
 
-from ..common import NotFoundException, InternalServerErrorException, Handler
+from ..common import WebException, Handler, HandlerArgumentSource
 from flask import Blueprint
-from werkzeug.exceptions import NotFound as WerkzeugNotFound, InternalServerError as WerkzeugInternalServerError
+from werkzeug.exceptions import HTTPException as WerkzeugHTTPException
 
 bp = Blueprint('error', __name__)
 
 
-@bp.app_errorhandler(WerkzeugNotFound)
+@bp.app_errorhandler(WerkzeugHTTPException)
 class NotFoundErrorHandler(Handler):
-    def do_any(self):
-        raise NotFoundException
+    def __init__(self):
+        super().__init__(arg_source=HandlerArgumentSource.DIRECT)
 
-
-@bp.app_errorhandler(WerkzeugInternalServerError)
-class InternalServerErrorHandler(Handler):
-    def do_any(self):
-        raise InternalServerErrorException
+    def do_any(self, ex: WerkzeugHTTPException):
+        raise WebException(ex.code, ex.description)

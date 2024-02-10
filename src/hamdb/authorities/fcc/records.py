@@ -66,7 +66,6 @@ class RecordDef:
         data_length = len(data)
 
         if field_length != data_length:
-            print(data)
             raise Exception(f"record length mismatch; expected {field_length}, received {data_length}")
 
         for i in range(0, field_length):
