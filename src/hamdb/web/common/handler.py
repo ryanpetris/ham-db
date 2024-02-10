@@ -93,7 +93,7 @@ class Handler:
         cls.register(app.route, *args, **kwargs)
 
     # noinspection PyMethodMayBeStatic
-    def _extract_arguments_for_method(self, func: Callable) -> Tuple[dict[str, str], list[str]]:
+    def _extract_arguments_for_method(self, func: callable) -> Tuple[dict[str, str], list[str]]:
         signature: inspect.Signature = inspect.signature(func)
         param_lower_map = {p.lower(): p for p in signature.parameters.keys()}
         filtered_args = {param_lower_map.get(k.lower()): v for k, v in request.args.items() if k.lower() in param_lower_map.keys()}
@@ -105,7 +105,7 @@ class Handler:
         yield '%s%s' % (self.request_func_prefix, method.lower())
         yield self.any_method_func
 
-    def _get_func_for_method(self, method: str) -> Optional[Callable]:
+    def _get_func_for_method(self, method: str) -> Optional[callable]:
         for func_name in self._gen_func_names_for_method(method):
             if not hasattr(self, func_name):
                 continue

@@ -8,7 +8,7 @@ bp = Blueprint('error', __name__)
 
 
 @register(bp.app_errorhandler, WerkzeugHTTPException)
-class NotFoundErrorHandler(Handler):
+class WerkzeugHTTPExceptionHandler(Handler):
     def __init__(self):
         super().__init__(arg_source=HandlerArgumentSource.DIRECT)
 

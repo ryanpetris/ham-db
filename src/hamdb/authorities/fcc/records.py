@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-from typing import Callable
-
-
 def fcc_record(record_type: str, primary_key: str, fields: list[str]):
     def init(class_type):
         record_def = RecordDef(class_type, record_type, primary_key, list(fields))
@@ -45,8 +42,8 @@ class RecordDef:
     def fields(self):
         return self._fields
 
-    def __init__(self, record_class: Callable, record_type: str, primary_key: str, fields: list[str]):
-        self._record_class: Callable = record_class
+    def __init__(self, record_class: callable, record_type: str, primary_key: str, fields: list[str]):
+        self._record_class: callable = record_class
         self._record_type: str = record_type.upper()
         self._primary_key: str = primary_key
         self._fields: list[str] = fields
