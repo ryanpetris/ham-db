@@ -26,8 +26,8 @@ CLASSIFIERS = [
     'Programming Language :: Python :: Implementation :: PyPy',
 ]
 PROJECT_URLS = {
-   'Bug Tracker': 'https://github.com/ryanpetris/ham-db/issues',
-   'Source Code': 'https://github.com/ryanpetris/ham-db',
+    'Bug Tracker': 'https://github.com/ryanpetris/ham-db/issues',
+    'Source Code': 'https://github.com/ryanpetris/ham-db',
 }
 COMMANDS = [
     'import',

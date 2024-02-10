@@ -32,10 +32,12 @@ class LicensesAdapter:
             administrators = self.query_callsign(*all_admin_callsigns, for_admins=True)
 
         for data in licenses:
-            data['qualifications'] = [i.get('data').get('qualification') for i in items if i.get('callsign') == data.get('callsign') and i.get('type') == 'Q']
+            data['qualifications'] = [i.get('data').get('qualification') for i in items if
+                                      i.get('callsign') == data.get('callsign') and i.get('type') == 'Q']
 
             if administrators:
-                admin_callsigns = [i.get('data').get('admin_callsign') for i in items if i.get('callsign') == data.get('callsign') and i.get('type') == 'A']
+                admin_callsigns = [i.get('data').get('admin_callsign') for i in items if
+                                   i.get('callsign') == data.get('callsign') and i.get('type') == 'A']
                 data['administrators'] = [i for i in administrators if i.get('callsign') in admin_callsigns]
 
         return licenses

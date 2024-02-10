@@ -280,6 +280,7 @@ class EnRecord(Record):
 
         super().__setattr__(key, value)
 
+
 @fcc_record(
     "HD",
     "unique_system_identifier",

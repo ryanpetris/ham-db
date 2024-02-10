@@ -6,7 +6,6 @@ import io
 from typing import IO, Iterable
 from zipfile import ZipFile
 
-
 ISED_CSV_HEADERS: list[str] = [
     'callsign',
     'first_name',

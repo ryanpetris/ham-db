@@ -96,13 +96,17 @@ class SqlConnection:
         self.execute(cmd_init)
 
     def schema_exists(self, schema: str):
-        result = self.fetch_one('SELECT true AS schema_exists FROM information_schema.schemata WHERE schema_name = %(schema)s;', schema=schema)
+        result = self.fetch_one(
+            'SELECT true AS schema_exists FROM information_schema.schemata WHERE schema_name = %(schema)s;',
+            schema=schema)
 
         return result and result.get('schema_exists', False)
 
     def set_setting(self, name: str, value: str):
         self._throw_if_readonly()
-        self.execute('INSERT INTO settings (name, value) VALUES (%(name)s, %(value)s) ON CONFLICT (name) DO UPDATE SET value = EXCLUDED.value', name=name, value=value)
+        self.execute(
+            'INSERT INTO settings (name, value) VALUES (%(name)s, %(value)s) ON CONFLICT (name) DO UPDATE SET value = EXCLUDED.value',
+            name=name, value=value)
 
 
 def _get_db_conninfo(**kwargs):

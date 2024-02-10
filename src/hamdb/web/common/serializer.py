@@ -62,7 +62,8 @@ class _Serializer:
         return serializer(result)
 
     @classmethod
-    def _find_serializer(cls, content_types: list[str]) -> Callable[[Union[dict[any, any], list[any], any]], tuple[str, str]]:
+    def _find_serializer(cls, content_types: list[str]) -> Callable[
+        [Union[dict[any, any], list[any], any]], tuple[str, str]]:
         for content_type in content_types:
             if content_type == CONTENT_TYPE_JSON:
                 return cls._serialize_json

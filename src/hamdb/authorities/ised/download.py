@@ -2,7 +2,6 @@
 
 from ...common import DownloadFile, download_file
 
-
 LICENSE_FULL_URL: str = 'https://apc-cap.ic.gc.ca/datafiles/amateur_delim.zip'
 
 

@@ -9,7 +9,7 @@ from flask.views import MethodView, http_method_funcs
 from flask.wrappers import Response
 from werkzeug.exceptions import MethodNotAllowed
 
-from .exceptions import BadRequestException, NotFoundException
+from .exceptions import NotFoundException
 from .serializer import serializer_wrapper
 from ...common import map_lower, keys_lower
 
@@ -18,7 +18,8 @@ def _extract_arguments_for_method(func: callable, kwargs: dict[str, any]) -> Tup
     signature = inspect.signature(func)
     args_lower_map = map_lower(signature.parameters.keys())
     provided_args = keys_lower({**kwargs, **request.args})
-    missing = [k.lower() for k, v in signature.parameters.items() if k.lower() not in provided_args and not v.default != inspect.Parameter.empty]
+    missing = [k.lower() for k, v in signature.parameters.items() if
+               k.lower() not in provided_args and not v.default != inspect.Parameter.empty]
 
     return {args_lower_map.get(k): v for k, v in provided_args.items() if k in args_lower_map}, missing
 

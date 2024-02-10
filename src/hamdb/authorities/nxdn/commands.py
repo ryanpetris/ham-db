@@ -48,7 +48,9 @@ def run_import(args: list[str]) -> bool:
             })
 
     sql.execute(cmd_full_init)
-    sql.execute_many(f'INSERT INTO {DB_SCHEMA_NXDN}.nxdnids (callsign, nxdnid, first_name, last_name, city, state, country) VALUES (%(callsign)s, %(nxdnid)s, %(first_name)s, %(last_name)s, %(city)s, %(state)s, %(country)s);', rows)
+    sql.execute_many(
+        f'INSERT INTO {DB_SCHEMA_NXDN}.nxdnids (callsign, nxdnid, first_name, last_name, city, state, country) VALUES (%(callsign)s, %(nxdnid)s, %(first_name)s, %(last_name)s, %(city)s, %(state)s, %(country)s);',
+        rows)
     sql.set_setting(LAST_DATE_SETTING, file.last_modified)
     sql.commit()
 

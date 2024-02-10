@@ -42,7 +42,8 @@ class IsedAdapter:
         )
 
     def get_callsign_data(self, callsign: str) -> Optional[dict[str, any]]:
-        return self._conn.fetch_one(f'SELECT * FROM {DB_SCHEMA_ISED}.licenses WHERE callsign = %(callsign)s', callsign=callsign)
+        return self._conn.fetch_one(f'SELECT * FROM {DB_SCHEMA_ISED}.licenses WHERE callsign = %(callsign)s',
+                                    callsign=callsign)
 
     def insert(self, table: str, data: dict[str, str]):
         command = self._get_insert_cmd(table, data)

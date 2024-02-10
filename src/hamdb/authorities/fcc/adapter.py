@@ -41,7 +41,9 @@ class FccAdapter:
 
     def get_callsign_data(self, callsign: str):
         hd_record = next(iter(sorted(sorted([
-            r for r in self._conn.fetch(f'SELECT unique_system_identifier, license_status, effective_date FROM {DB_SCHEMA_FCC}.hd WHERE callsign = %(callsign)s', callsign=callsign)
+            r for r in self._conn.fetch(
+                f'SELECT unique_system_identifier, license_status, effective_date FROM {DB_SCHEMA_FCC}.hd WHERE callsign = %(callsign)s',
+                callsign=callsign)
         ], key=lambda r: r["effective_date"]), key=lambda r: r["license_status"])), None)
 
         if not hd_record:
@@ -50,7 +52,8 @@ class FccAdapter:
         return self.get_unique_identifier_data(hd_record["unique_system_identifier"])
 
     def get_frn_data(self, frn: str):
-        en_record = self._conn.fetch_one(f'SELECT unique_system_identifier FROM {DB_SCHEMA_FCC}.en WHERE frn = %(frn)s', frn=frn)
+        en_record = self._conn.fetch_one(f'SELECT unique_system_identifier FROM {DB_SCHEMA_FCC}.en WHERE frn = %(frn)s',
+                                         frn=frn)
 
         if not en_record:
             return None

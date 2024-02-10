@@ -51,6 +51,7 @@ def _db_to_basic_data(data: dict[str, any]) -> dict[str, any]:
     }
 
     if not result.get('administrators', None) and (data.get('extra_data', None) or {}).get('_administrators'):
-        result['administrators'] = [_db_to_basic_data(a) for a in (data.get('extra_data', None) or {}).get('_administrators') or []]
+        result['administrators'] = [_db_to_basic_data(a) for a in
+                                    (data.get('extra_data', None) or {}).get('_administrators') or []]
 
     return result
