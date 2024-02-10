@@ -2,11 +2,10 @@
 
 import importlib
 import os
-
 from abc import ABC, abstractmethod
-from .converter import DataConverter
 from typing import Optional
 
+from .converter import DataConverter
 
 authority_cache: dict[str, 'Authority'] = {}
 
@@ -74,6 +73,6 @@ def get_authority(code: str) -> 'Authority':
     code = code.upper()
 
     if code not in authority_cache:
-        raise Exception(f'Invalid authority code: {code}')
+        raise Exception(f'Invalid authority code: {code!r}')
 
     return authority_cache[code]

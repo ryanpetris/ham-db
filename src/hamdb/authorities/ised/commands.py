@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
+from typing import Iterable
+
 from .adapter import IsedAdapter
 from .download import get_full_file
 from .parser import parse_ised_zip
 from ...common import eprint
 from ...db import SqlConnection
-from typing import Iterable
-
 
 ISED_LICENSE_FILE_LAST_DATE_SETTING: str = 'ised_license_file_last_date'
 

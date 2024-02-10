@@ -5,7 +5,7 @@ import sys
 import time
 
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Iterable, Optional
 
 
 def eprint(*args, **kwargs):
@@ -62,3 +62,11 @@ def last_modified_date_to_datetime(date: str) -> Optional[datetime]:
     # Example Date: 'Sun, 04 Feb 2024 22:18:43 GMT'
     date_parts = time.strptime(date, '%a, %d %b %Y %H:%M:%S %Z')[0:6]
     return datetime(*date_parts, tzinfo=timezone.utc)
+
+
+def map_lower(items: Iterable[str]) -> dict[str, str]:
+    return {p.lower(): p for p in items}
+
+
+def keys_lower(items: dict[str, any]) -> dict[str, any]:
+    return {k.lower(): v for k, v in items.items()}

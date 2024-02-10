@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
-import sys
+from typing import Optional
 
 from .adapter import LicensesAdapter
 from ..common import get_authority
 from ..db import SqlConnection
-from typing import Optional
 
 
 def query_basic_data(callsign: str = None) -> Optional[dict[str, any]]:

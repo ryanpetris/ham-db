@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-from ...common import DownloadFile, download_file
 from typing import Iterable
 
+from ...common import DownloadFile, download_file
 
 AM_LICENSE_FULL_URL: str = 'https://data.fcc.gov/download/pub/uls/complete/l_amat.zip'
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from typing import Iterable
+
 from .adapter import FccAdapter
 from .download import get_daily_files, get_full_file
 from .parser import parse_fcc_zip
@@ -7,8 +9,6 @@ from .records import Record
 from ...common import eprint
 from ...common.settings import DB_SCHEMA_FCC
 from ...db import SqlConnection
-from typing import Iterable
-
 
 FCC_LICENSE_FILE_LAST_DATE_SETTING: str = 'fcc_license_file_last_date'
 

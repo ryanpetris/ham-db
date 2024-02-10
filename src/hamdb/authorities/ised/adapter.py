@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
+from typing import Optional
+
 from .sql_queries import cmd_full_init
 from ...common.settings import DB_SCHEMA_ISED
 from ...db import SqlConnection
-from typing import Optional
 
 
 class IsedAdapter:

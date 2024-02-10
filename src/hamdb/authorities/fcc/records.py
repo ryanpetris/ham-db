@@ -84,7 +84,7 @@ class Record:
         record_def = Record.record_map.get(record_type.upper(), None)
 
         if record_def is None:
-            raise Exception(f"invalid or unknown record type: {record_type}")
+            raise Exception(f"invalid or unknown record type: {record_type!r}")
 
         return record_def.init_record(data)
 

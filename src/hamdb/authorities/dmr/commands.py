@@ -2,12 +2,12 @@
 
 import csv
 import io
+from typing import Iterable
 
 from .sql_queries import cmd_full_init
 from ...common import download_file
 from ...common.settings import DB_SCHEMA_DMR
 from ...db import SqlConnection
-from typing import Iterable
 
 LICENSE_FULL_URL: str = 'https://radioid.net/static/dmrid.dat'
 LAST_DATE_SETTING: str = 'dmr_id_file_last_date'

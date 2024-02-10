@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-from ...common import DataConverter
 from typing import Optional
+
+from ...common import DataConverter
 
 
 class IsedDataConverter(DataConverter):

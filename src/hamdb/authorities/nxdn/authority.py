@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
+from typing import Optional
+
 from .commands import run_import
 from .sql_queries import cmd_license_insert
 from ...common import Authority as BaseAuthority, DataConverter
-from typing import Optional
 
 
 class Authority(BaseAuthority):

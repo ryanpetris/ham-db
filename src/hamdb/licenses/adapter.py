@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
+from typing import Optional
+
 from .sql_queries import cmd_init, cmd_license_query
 from ..common import eprint, get_known_authority_codes, get_authority
 from ..db import SqlConnection
-from typing import Optional
 
 
 class LicensesAdapter:

@@ -4,10 +4,10 @@ import http.client
 import shutil
 import tempfile
 import urllib.request
-
-from .util import datetime_to_iso_datetime, iso_datetime_to_datetime, last_modified_date_to_datetime
 from datetime import datetime
 from typing import IO, Optional, Union
+
+from .util import datetime_to_iso_datetime, iso_datetime_to_datetime, last_modified_date_to_datetime
 
 
 class DownloadFile:

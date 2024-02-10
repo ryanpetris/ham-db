@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-from .app import error_bp, root_bp
 from flask import Flask
+
+from .app import error_bp, root_bp
 
 
 def create_app():

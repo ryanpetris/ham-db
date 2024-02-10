@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
+from decimal import Decimal
+from typing import TYPE_CHECKING, Iterable, Optional
+
 import psycopg
 import psycopg.conninfo
 
 from .queries import cmd_init
 from ..common.settings import DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD
-from decimal import Decimal
-from typing import TYPE_CHECKING, Iterable, Optional
 
 if TYPE_CHECKING:
     from _typeshed.dbapi import DBAPIConnection, DBAPICursor
