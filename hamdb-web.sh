@@ -2,4 +2,4 @@
 
 export PYTHONPATH="$(cd "$(dirname "$0")" && pwd)/src:$PYTHONPATH"
 
-exec flask --app 'hamdb.web:create_app()' run
+exec python3 -u -m hamdb.cli.web_cmd "$@"

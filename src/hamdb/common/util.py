@@ -70,3 +70,19 @@ def map_lower(items: Iterable[str]) -> dict[str, str]:
 
 def keys_lower(items: dict[str, any]) -> dict[str, any]:
     return {k.lower(): v for k, v in items.items()}
+
+
+def safe_get(data: dict[str, any], *keys: any, default: any = None) -> any:
+    for key in keys:
+        if data is None:
+            return default
+
+        if not isinstance(data, dict):
+            return default
+
+        data = data.get(key, None)
+
+    if data is None:
+        return default
+
+    return data

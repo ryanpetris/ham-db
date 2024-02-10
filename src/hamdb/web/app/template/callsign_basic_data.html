@@ -1,7 +1,142 @@
 {% extends 'master.html' %}
 
+{% macro create_badge(type, text) %}
+    <span class="align-text-bottom badge badge-{{ type }}" style="margin: 0 0.25rem">{{ text }}</span>
+{% endmacro %}
+
 {% block title %}{{ license.callsign }} License{% endblock %}
 
 {% block content %}
-    <h1>{{ license.callsign }}</h1>
+    <h1 style="margin-top: 2rem; margin-bottom: 1rem;">
+        {{ license.callsign }}
+
+        {% for qual in license.license.qualifications -%}
+            {%- if qual == 'FCC:AMATEUR_EXTRA' -%}
+                {{ create_badge('dark', 'Amateur Extra') }}
+            {%- elif qual == 'FCC:ADVANCED' -%}
+                {{ create_badge('primary', 'Advanced') }}
+            {%- elif qual == 'FCC:GENERAL' -%}
+                {{ create_badge('primary', 'General') }}
+            {%- elif qual == 'FCC:TECHNICIAN_PLUS' -%}
+                {{ create_badge('success', 'Technician Plus') }}
+            {%- elif qual == 'FCC:TECHNICIAN' -%}
+                {{ create_badge('success', 'Technician') }}
+            {%- elif qual == 'FCC:NOVICE' -%}
+                {{ create_badge('success', 'Novice') }}
+            {%- elif qual == 'ISED:BASIC' -%}
+                {{ create_badge('success', 'Basic') }}
+            {%- elif qual == 'ISED:5WPM' -%}
+                {{ create_badge('primary', '5 WPM') }}
+            {%- elif qual == 'ISED:12WPM' -%}
+                {{ create_badge('primary', '12 WPM') }}
+            {%- elif qual == 'ISED:ADVANCED' -%}
+                {{ create_badge('dark', 'Advanced') }}
+            {%- elif qual == 'ISED:BASIC_HONOURS' -%}
+                {{ create_badge('primary', 'Basic with Honours') }}
+            {%- endif -%}
+        {%- endfor %}
+
+        {%- if license.license.entity_type == 'CLUB' -%}
+            {{ create_badge('danger', 'Club') }}
+        {%- elif license.license.entity_type == 'GOVERNMENT' -%}
+            {{ create_badge('danger', 'Government') }}
+        {%- elif license.license.entity_type == 'MILITARY' -%}
+            {{ create_badge('danger', 'Military') }}
+        {%- elif license.license.entity_type == 'RACES' -%}
+            {{ create_badge('danger', 'RACES') }}
+        {%- endif -%}
+    </h1>
+    <div class="row">
+        <div class="col-lg-6 col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title text-center font-weight-bold">Information</h5>
+                    <div class="row">
+                        <div class="col-4 text-right font-weight-bold">Name</div>
+                        <div class="col-8">{{ license.name }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 text-right font-weight-bold">Callsign</div>
+                        <div class="col-8">{{ license.callsign }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 text-right font-weight-bold">Authority</div>
+                        <div class="col-8">{{ license.license.authority }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 text-right font-weight-bold">Expiration Date</div>
+                        <div class="col-8">{{ license.license.expiration_date }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 text-right font-weight-bold">Address</div>
+                        <div class="col-8">
+                            {% if license.address.line1 -%}
+                                {{ license.address.line1 }}<br/>
+                            {%- endif %}
+                            {% if license.address.line2 -%}
+                                {{ license.address.line2 }}<br/>
+                            {%- endif %}
+                            {% if license.address.city -%}
+                                {{ license.address.city }},
+                            {%- endif %}
+                            {% if license.address.state -%}
+                                {{ license.address.state }}
+                            {%- endif %}
+                            {% if license.address.zip -%}
+                                {{ license.address.zip }}
+                            {%- endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-100 d-block d-lg-none">
+            &nbsp;
+        </div>
+        <div class="col-lg-6 col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title text-center font-weight-bold">Identifiers</h5>
+                    {% if license.extra_data.dmr_ids -%}
+                        <div class="row">
+                            <div class="col-4 text-right font-weight-bold">DMR ID{% if license.extra_data.dmr_ids|length > 1 %}s{% endif %}</div>
+                            <div class="col-8">
+                                {% for dmr_id in license.extra_data.dmr_ids -%}
+                                    {{ dmr_id }} <br/>
+                                {%- endfor %}
+                            </div>
+                        </div>
+                    {%- endif %}
+                    {% if license.extra_data.nxdn_ids -%}
+                        <div class="row">
+                            <div class="col-4 text-right font-weight-bold">NXDN ID{% if license.extra_data.nxdn_ids|length > 1 %}s{% endif %}</div>
+                            <div class="col-8">
+                                {% for nxdn_id in license.extra_data.nxdn_ids -%}
+                                    {{ nxdn_id }} <br/>
+                                {%- endfor %}
+                            </div>
+                        </div>
+                    {%- endif %}
+                    {% if license.extra_data.frn -%}
+                        <div class="row">
+                            <div class="col-4 text-right font-weight-bold">FCC FRN</div>
+                            <div class="col-8">{{ license.extra_data.frn }}</div>
+                        </div>
+                    {%- endif %}
+                    {% if license.extra_data.licensee_id -%}
+                        <div class="row">
+                            <div class="col-4 text-right font-weight-bold">FCC LID</div>
+                            <div class="col-8">{{ license.extra_data.licensee_id }}</div>
+                        </div>
+                    {%- endif %}
+                    {% if license.extra_data.unique_system_identifier -%}
+                        <div class="row">
+                            <div class="col-4 text-right font-weight-bold">FCC UID</div>
+                            <div class="col-8">{{ license.extra_data.unique_system_identifier }}</div>
+                        </div>
+                    {%- endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
