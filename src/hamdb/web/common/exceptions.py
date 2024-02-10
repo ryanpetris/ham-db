@@ -36,3 +36,12 @@ class NotFoundException(WebException):
 
     def __init__(self, message: Optional[str] = None):
         super().__init__(message or 'Not Found')
+
+
+class InternalServerErrorException(WebException):
+    @property
+    def status_code(self) -> int:
+        return 500
+
+    def __init__(self, message: Optional[str] = None):
+        super().__init__(message or 'Internal Server Error')

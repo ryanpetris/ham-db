@@ -1,25 +1,12 @@
 #!/usr/bin/env python3
 
-from .exceptions import BadRequestException, NotFoundException
-from .response import dynamic_response
-from ..licenses import query_basic_data
-from flask import Flask, request
+from .app import error_bp, root_bp
+from flask import Flask
 
 
-app = Flask(__name__)
+def create_app():
+    app = Flask(__name__)
+    app.register_blueprint(error_bp)
+    app.register_blueprint(root_bp)
 
-
-@app.route('/query')
-@dynamic_response(app)
-def query():
-    callsign = request.args.get('callsign', None)
-
-    if not callsign:
-        raise BadRequestException('Callsign not specified')
-
-    data = query_basic_data(callsign)
-
-    if not data:
-        raise NotFoundException(f'Callsign {callsign} not found.')
-
-    return data
+    return app
