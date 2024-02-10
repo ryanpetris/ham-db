@@ -1,78 +1,38 @@
 #!/usr/bin/env python3
 
 import json
-import re
-from typing import Callable, Pattern, Tuple, Union
+from typing import Callable, Tuple, Union
 
 import yaml
 from dict2xml import Converter as XmlConverter
-from flask import request
 from flask.wrappers import Response
 
 from .constants import CONTENT_TYPE_JSON, CONTENT_TYPE_YAML, CONTENT_TYPE_XML, DEFAULT_CHARSET
 from .exceptions import WebException
+from .headers import get_header_preference
 from ...common import clean_null_fields
-
-ACCEPT_HEADER_REGEX: Pattern = re.compile('(?P<type>[a-z/+]+)(;q=(?P<weight>[0-9.]+))?', re.RegexFlag.IGNORECASE)
-
-
-def _get_accept_header_values() -> list[str]:
-    accept_header = request.headers.get('accept', None)
-
-    if accept_header is None:
-        return []
-
-    items: list[dict[str, str]] = []
-
-    for header in accept_header.split(','):
-        header = header.strip().lower()
-        match = ACCEPT_HEADER_REGEX.fullmatch(header.strip())
-
-        if not match:
-            continue
-
-        content_type = match.group('type')
-        weight = 1
-
-        try:
-            str_weight = match.group('weight')
-
-            if str_weight:
-                weight = float(str_weight)
-        except ValueError:
-            continue
-
-        items.append({
-            'type': content_type,
-            'weight': weight
-        })
-
-    items.sort(key=lambda i: (-i['weight'], i['type']))
-
-    return [i['type'] for i in items]
 
 
 class _Serializer:
     @classmethod
     def serialize(cls, data: Union[dict[any, any], list[any], any]) -> Tuple[str, str]:
-        accept_headers = _get_accept_header_values()
-        serializer = cls._find_serializer(accept_headers)
+        serializer = cls._find_serializer()
         result = clean_null_fields(data)
 
         return serializer(result)
 
     @classmethod
-    def _find_serializer(cls, content_types: list[str]) -> Callable[
-        [Union[dict[any, any], list[any], any]], tuple[str, str]]:
-        for content_type in content_types:
-            if content_type == CONTENT_TYPE_JSON:
-                return cls._serialize_json
+    def _find_serializer(cls) -> Callable[[Union[dict[any, any], list[any], any]], tuple[str, str]]:
+        content_type = get_header_preference(CONTENT_TYPE_JSON, CONTENT_TYPE_YAML, CONTENT_TYPE_XML)
 
-            if content_type == CONTENT_TYPE_YAML:
-                return cls._serialize_yaml
+        if content_type == CONTENT_TYPE_JSON:
+            return cls._serialize_json
 
-            if content_type == CONTENT_TYPE_XML:
-                return cls._serialize_xml
+        if content_type == CONTENT_TYPE_YAML:
+            return cls._serialize_yaml
+
+        if content_type == CONTENT_TYPE_XML:
+            return cls._serialize_xml
 
         return cls._serialize_json
 

@@ -26,4 +26,4 @@ class BadRequestException(WebException):
 
 class NotFoundException(WebException):
     def __init__(self, message: Optional[str] = None):
-        super().__init__(400, message or 'Not Found')
+        super().__init__(404, message or 'Not Found')

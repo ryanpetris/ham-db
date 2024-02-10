@@ -9,7 +9,9 @@ from flask.views import MethodView, http_method_funcs
 from flask.wrappers import Response
 from werkzeug.exceptions import MethodNotAllowed
 
+from .constants import CONTENT_TYPE_JSON, CONTENT_TYPE_YAML, CONTENT_TYPE_HTML
 from .exceptions import NotFoundException
+from .headers import get_header_preference
 from .serializer import serializer_wrapper
 from ...common import map_lower, keys_lower
 
@@ -43,6 +45,15 @@ def _get_func_for_method(view: 'BaseView', method: str) -> Optional[callable]:
 
 class BaseView(MethodView):
     provide_automatic_options = True
+
+    @property
+    def is_html_requested(self) -> bool:
+        return get_header_preference(
+            CONTENT_TYPE_HTML,
+            CONTENT_TYPE_JSON,
+            CONTENT_TYPE_YAML,
+            CONTENT_TYPE_YAML
+        ) == CONTENT_TYPE_HTML
 
     @serializer_wrapper
     def dispatch_request(self, **kwargs) -> Response:
