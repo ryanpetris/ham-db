@@ -18,4 +18,4 @@ def serialize_yaml(data: Union[dict[any, any], list[any], any]) -> tuple[str, st
 
 def serialize_xml(data: Union[dict[any, any], list[any], any]) -> tuple[str, str]:
     converter = XmlConverter(indent=None, newlines=None)
-    return converter.build(data), f'{CONTENT_TYPE_XML}; charset={DEFAULT_CHARSET}'
+    return converter.build({'result': data}), f'{CONTENT_TYPE_XML}; charset={DEFAULT_CHARSET}'
