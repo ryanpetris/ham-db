@@ -32,12 +32,6 @@ class Handler:
     request_func_prefix = 'do_'
     any_method_func = f'{request_func_prefix}any'
 
-    def __new__(cls, *args, **kwargs):
-        instance = super().__new__(cls)
-        instance.__init__()
-
-        return instance(*args, **kwargs)
-
     def __init__(self, arg_source: HandlerArgumentSource = None):
         self._arg_source: HandlerArgumentSource = arg_source or HandlerArgumentSource.REQUEST
 
@@ -80,8 +74,12 @@ class Handler:
             raise Exception(f'Invalid arg_source value: {self._arg_source}')
 
     @classmethod
-    def register_route(cls, app: Scaffold, rule: str, **options: any):
-        if 'methods' not in options:
+    def register(cls, func: callable, *args, **kwargs):
+        func(*args, **kwargs)(cls().__call__)
+
+    @classmethod
+    def register_route(cls, app: Scaffold, *args, **kwargs):
+        if 'methods' not in kwargs:
             do_methods = [k for k, v in inspect.getmembers(cls) if k.startswith(cls.request_func_prefix) and isinstance(v, Callable)]
 
             if cls.any_method_func in do_methods:
@@ -90,10 +88,9 @@ class Handler:
                 temp_methods = [m.removeprefix(cls.request_func_prefix).upper() for m in do_methods]
                 methods = [m for m in temp_methods if m in ALL_HTTP_METHODS]
 
-            options['methods'] = methods
+            kwargs['methods'] = methods
 
-        # noinspection PyTypeChecker
-        app.route(rule, **options)(cls)
+        cls.register(app.route, *args, **kwargs)
 
     # noinspection PyMethodMayBeStatic
     def _extract_arguments_for_method(self, func: Callable) -> Tuple[dict[str, str], list[str]]:

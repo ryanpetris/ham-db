@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-from ..common import BadRequestException, NotFoundException, Handler, app_route
+from ..common import BadRequestException, NotFoundException, Handler, register_route
 from ...licenses import query_basic_data
 from flask import Blueprint
 
 bp = Blueprint('root', __name__)
 
 
-@app_route(bp, '/query')
+@register_route(bp, '/query')
 class QueryHandler(Handler):
     def do_get(self, callsign: str):
         if not callsign:
