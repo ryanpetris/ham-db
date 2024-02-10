@@ -3,10 +3,11 @@
 import inspect
 from typing import Callable, Optional, Tuple
 
-from flask import request
+from flask import request, render_template
 from flask.globals import current_app
 from flask.views import MethodView, http_method_funcs
 from flask.wrappers import Response
+from jinja2.environment import Template
 from werkzeug.exceptions import MethodNotAllowed
 
 from .constants import CONTENT_TYPE_JSON, CONTENT_TYPE_YAML, CONTENT_TYPE_HTML
@@ -14,6 +15,7 @@ from .exceptions import NotFoundException
 from .headers import get_header_preference
 from .serializer import serializer_wrapper
 from ...common import map_lower, keys_lower
+from ...common.settings import SITE_NAME
 
 
 def _extract_arguments_for_method(func: callable, kwargs: dict[str, any]) -> Tuple[dict[str, str], list[str]]:
@@ -41,6 +43,12 @@ def _get_func_for_method(view: 'BaseView', method: str) -> Optional[callable]:
         return None
 
     return func
+
+
+def _get_template_config():
+    return {
+        'site_name': SITE_NAME
+    }
 
 
 class BaseView(MethodView):
@@ -71,3 +79,7 @@ class BaseView(MethodView):
             raise MethodNotAllowed()
 
         return current_app.ensure_sync(func)(**args)
+
+    @staticmethod
+    def render_template(template: str | Template | list[str | Template], **context) -> str:
+        return render_template(template, config=_get_template_config(), **context)

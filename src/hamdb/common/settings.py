@@ -11,3 +11,5 @@ DB_SCHEMA_ISED: str = os.environ.get('HAMDB_DB_SCHEMA_ISED', 'ised')
 DB_SCHEMA_LICENSES: str = os.environ.get('HAMDB_DB_SCHEMA_LICENSES', 'licenses')
 DB_SCHEMA_DMR: str = os.environ.get('HAMDB_DB_SCHEMA_LICENSES', 'dmr')
 DB_SCHEMA_NXDN: str = os.environ.get('HAMDB_DB_SCHEMA_LICENSES', 'nxdn')
+
+SITE_NAME = os.environ.get('HAMDB_SITE_NAME', 'HAMDB')

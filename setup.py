@@ -49,13 +49,16 @@ setup(
     download_url=DOWNLOAD_URL,
     classifiers=CLASSIFIERS,
     project_urls=PROJECT_URLS,
+    include_package_data=True,
     python_requires='>=3.11',
     install_requires=[
         'dict2xml',
         'Flask',
+        'Jinja2',
         'psycopg',
         'psycopg[binary,pool]',
-        'PyYAML'
+        'PyYAML',
+        'Werkzeug'
     ],
     package_dir={
         '': 'src'
