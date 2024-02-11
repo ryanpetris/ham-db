@@ -1,12 +1,12 @@
 {% extends 'master.html' %}
 
 {% macro render_badge(type, text) -%}
-    <span class="align-text-bottom badge badge-{{ type }}" style="margin: 0 0.25rem">{{ text }}</span>
+    <span class="badge bg-{{ type }}" style="margin: 0 0.25rem">{{ text }}</span>
 {%- endmacro %}
 
 {% macro render_info_row(title, data) -%}
     <div class="row">
-        <div class="col-4 text-right font-weight-bold">{{ title }}</div>
+        <div class="col-4 text-right fw-bold">{{ title }}</div>
         <div class="col-8">{{ data }}</div>
     </div>
 {%- endmacro %}
@@ -18,7 +18,7 @@
 {% macro render_license(license) %}
     <div class="card" style="margin-top: 1rem">
         <div class="card-body">
-            <h2 class="card-title font-weight-bold" style="margin-bottom: 1.25rem;">
+            <h2 class="card-title fw-bold" style="margin-bottom: 1.25rem;">
                 {{ license.callsign }}
 
                 {% for qual in license.license.qualifications -%}
@@ -62,7 +62,7 @@
                 <div class="col-lg-6 col-md-12">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title text-center font-weight-bold">Information</h5>
+                            <h5 class="card-title text-center fw-bold">Information</h5>
                             {{ render_info_row('Name', license.name) }}
                             {{ render_info_row('Callsign', license.callsign) }}
                             {{ render_info_row('Authority', license.license.authority) }}
@@ -94,7 +94,7 @@
                 <div class="col-lg-6 col-md-12">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title text-center font-weight-bold">Identifiers</h5>
+                            <h5 class="card-title text-center fw-bold">Identifiers</h5>
                             {% if license.extra_data.dmr_ids -%}
                                 {% call render_info_row_block('DMR ID' + ('s' if license.extra_data.dmr_ids|length > 1 else '')) %}
                                     {% for dmr_id in license.extra_data.dmr_ids -%}

@@ -1,9 +1,9 @@
 <div class="card align-center" style="max-width: 25rem; margin: 1rem auto;">
     <div class="card-body">
-        <h2 class="card-title font-weight-bold" style="margin-bottom: 1.25rem;">License Query</h2>
+        <h5 class="card-title fw-bold" style="margin-bottom: 1.25rem;">License Query</h5>
         <form action="/query" method="GET">
-            <div class="form-group">
-                <label for="callsign">Callsign</label>
+            <div class="mb-3">
+                <label for="callsign" class="form-label">Callsign</label>
 
                 <input type="text"
                        class="form-control"
@@ -12,11 +12,13 @@
                        aria-describedby="callsign_help"
                        placeholder="Callsign"/>
 
-                <small id="callsign_help" class="form-text text-muted">
+                <div id="callsign_help" class="form-text">
                     The Amateur Radio operator's callsign to lookup.
-                </small>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">Lookup</button>
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Lookup</button>
+            </div>
         </form>
     </div>
 </div>
