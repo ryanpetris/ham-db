@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from .sql_queries import cmd_init, cmd_license_query
+from .sql_queries import cmd_init, cmd_license_query, cmd_stats_query
 from ..common import eprint, get_known_authority_codes, get_authority
 from ..db import SqlConnection
 
@@ -61,3 +61,6 @@ class LicensesAdapter:
 
             eprint(f'Repopulating {authority.code} license data...')
             self._conn.execute(authority.sync_sql_command)
+
+        eprint('Generating license statistics...')
+        self._conn.execute(cmd_stats_query)

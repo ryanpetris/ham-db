@@ -66,3 +66,64 @@ SELECT
 FROM {DB_SCHEMA_LICENSES}.administrators a
 WHERE   a.callsign = ANY(%(callsigns)s);
 """
+
+cmd_stats_query = f"""
+WITH active_licenses AS (
+    SELECT
+        'active_licenses' AS type,
+        l.authority,
+        COUNT(*) AS count
+    FROM {DB_SCHEMA_LICENSES}.licenses l
+    WHERE l.status != 'N'
+    GROUP BY l.authority
+), active_licenses_by_qualification AS (
+    SELECT
+        'active_licenses_by_qualification' AS type,
+        l.authority,
+        q.qualification,
+        COUNT(*) AS count
+    FROM {DB_SCHEMA_LICENSES}.licenses l
+    INNER JOIN {DB_SCHEMA_LICENSES}.qualifications q ON l.callsign = q.callsign
+    WHERE l.status != 'N'
+    GROUP BY l.authority, q.qualification
+), active_licenses_by_state AS (
+    SELECT
+        'active_licenses_by_state' AS type,
+        l.authority,
+        UPPER(l.address_state) AS state,
+        COUNT(*) AS count
+    FROM {DB_SCHEMA_LICENSES}.licenses l
+    WHERE l.status != 'N'
+    GROUP BY l.authority, UPPER(l.address_state)
+), active_dmr_ids AS (
+    SELECT
+        'active_dmr_ids' AS type,
+        l.authority,
+        SUM(jsonb_array_length(l.extra_data -> 'dmr_ids')) AS count
+    FROM {DB_SCHEMA_LICENSES}.licenses l
+    WHERE   l.status != 'N'
+        AND l.extra_data -> 'dmr_ids' IS NOT NULL
+    GROUP BY l.authority
+), active_nxdn_ids AS (
+    SELECT
+        'active_nxdn_ids' AS type,
+        l.authority,
+        SUM(jsonb_array_length(l.extra_data -> 'nxdn_ids')) AS count
+    FROM {DB_SCHEMA_LICENSES}.licenses l
+    WHERE   l.status != 'N'
+        AND l.extra_data -> 'nxdn_ids' IS NOT NULL
+    GROUP BY l.authority
+), results AS (
+    SELECT to_jsonb(q) AS result FROM active_licenses q
+    UNION ALL
+    SELECT to_jsonb(q) AS result FROM active_licenses_by_qualification q
+    UNION ALL
+    SELECT to_jsonb(q) AS result FROM active_licenses_by_state q
+    UNION ALL
+    SELECT to_jsonb(q) AS result FROM active_dmr_ids q
+    UNION ALL
+    SELECT to_jsonb(q) AS result FROM active_nxdn_ids q
+)
+INSERT INTO statistics (data)
+SELECT jsonb_agg(q.result) AS data FROM results q;
+"""

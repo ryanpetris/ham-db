@@ -1,0 +1,116 @@
+{% extends 'master.html' %}
+
+{%- set qualifications_by_authority = {
+    'FCC': [
+        { 'code': 'FCC:AMATEUR_EXTRA', 'description': 'Amateur Extra' },
+        { 'code': 'FCC:ADVANCED', 'description': 'Advanced' },
+        { 'code': 'FCC:GENERAL', 'description': 'General' },
+        { 'code': 'FCC:TECHNICIAN_PLUS', 'description': 'Technician Plus' },
+        { 'code': 'FCC:TECHNICIAN', 'description': 'Technician' },
+        { 'code': 'FCC:NOVICE', 'description': 'Novice' }
+    ],
+    'ISED': [
+        { 'code': 'ISED:ADVANCED', 'description': 'Advanced' },
+        { 'code': 'ISED:BASIC_HONOURS', 'description': 'Basic with Honours' },
+        { 'code': 'ISED:BASIC', 'description': 'Basic' },
+        { 'code': 'ISED:12WPM', 'description': '12 WPM' },
+        { 'code': 'ISED:5WPM', 'description': '5 WPM' }
+    ]
+} -%}
+
+{%- set authority_names = {
+    'FCC': 'Federal Communications Commission',
+    'ISED': 'Innovation, Science and Economic Development Canada'
+} -%}
+
+{% macro monospaced_font(text) -%}
+    <span class="font-monospace">{{ text }}</span>
+{%- endmacro %}
+
+{% macro render_number_row(title, data) -%}
+    <div class="row g-2">
+        <div class="col-6 text-end">{{ monospaced_font('{:,}'.format(data)) }}</div>
+        <div class="col-6 fw-bold">{{ title }}</div>
+    </div>
+{%- endmacro %}
+
+{% macro render_qualification(qualification, data) -%}
+    {% set count = data | selectattr('qualification', 'equalto', qualification.code) | map(attribute='count') | first or 0 %}
+
+    {% if count > 0 %}
+        {{ render_number_row(qualification.description, count) }}
+    {% endif %}
+{%- endmacro %}
+
+{% macro render_state(data) -%}
+    {{ render_number_row(monospaced_font(data.state or '??'), data.count) }}
+{%- endmacro %}
+
+{% macro render_authority_data(authority, date, data) -%}
+    {% set active_count = data | selectattr('type', 'equalto', 'active_licenses') | map(attribute="count") | first %}
+    {% set by_qual = data | selectattr('type', 'equalto', 'active_licenses_by_qualification') | list %}
+    {% set by_state = data | selectattr('type', 'equalto', 'active_licenses_by_state') | sort(attribute="state") | list %}
+    {% set active_dmr_ids = data | selectattr('type', 'equalto', 'active_dmr_ids') | map(attribute='count') | first or 0 %}
+    {% set active_nxdn_ids = data | selectattr('type', 'equalto', 'active_nxdn_ids') | map(attribute='count') | first or 0 %}
+    {% set qualifications = qualifications_by_authority[authority] %}
+    {% set authority_name = authority_names[authority] or authority %}
+
+    <div class="card" style="margin-top: 1rem">
+        <div class="card-body">
+            <h2 class="card-title fw-bold">{{ authority_name }}</h2>
+            <h6 class="card-subtitle" style="margin-bottom: 1.25rem;">
+                Generated {{ date.strftime('%B %-d, %Y at %-I:%M:%S %p') }} UTC</h6>
+            <div class="row">
+                <div class="col-lg-6 col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title text-center fw-bold">Quick Statistics</h5>
+                            {{ render_number_row('Total Licenses', active_count) }}
+                            {{ render_number_row('DMR IDs', active_dmr_ids) }}
+                            {{ render_number_row('NXDN IDs', active_nxdn_ids) }}
+                        </div>
+                    </div>
+                    <div class="w-100 d-block">
+                        &nbsp;
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title text-center fw-bold">Licenses by Qualification</h5>
+                            {% for qualification in qualifications -%}
+                                {{ render_qualification(qualification, by_qual) }}
+                            {%- endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="w-100 d-block d-lg-none">
+                    &nbsp;
+                </div>
+                <div class="col-lg-6 col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title text-center fw-bold">Licenses by State</h5>
+                            {% for item in by_state -%}
+                                {{ render_state(item) }}
+                            {%- endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{%- endmacro %}
+
+{% macro render_statistics(statistics) -%}
+    {% set authorities = statistics.data | map(attribute='authority') | unique | list %}
+
+    {% for authority in authorities %}
+        {% set authority_data = statistics.data | selectattr('authority', 'equalto', authority) | list %}
+        {{ render_authority_data(authority, statistics.date, authority_data) }}
+    {% endfor %}
+{%- endmacro %}
+
+{% block content %}
+    {% for item in statistics -%}
+        {{ render_statistics(item) }}
+    {%- endfor %}
+{% endblock %}

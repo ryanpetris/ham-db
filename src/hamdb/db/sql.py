@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Iterable, Optional
 import psycopg
 import psycopg.conninfo
 
-from .queries import cmd_init
+from .sql_queries import cmd_init
 from ..common.settings import DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD
 
 if TYPE_CHECKING:

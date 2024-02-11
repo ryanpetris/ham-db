@@ -15,7 +15,7 @@ from ...common import clean_null_fields
 
 
 def _serialize_json(data: Union[dict[any, any], list[any], any]) -> str:
-    return json.dumps(data, sort_keys=True)
+    return json.dumps(data, sort_keys=True, default=str)
 
 
 def _serialize_yaml(data: Union[dict[any, any], list[any], any]) -> str:

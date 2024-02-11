@@ -4,6 +4,7 @@ from flask import Blueprint
 
 from ..common import BadRequestException, NotFoundException, BaseView, register_route
 from ...common import safe_get
+from ...db import query_statistics_latest
 from ...licenses import query_basic_data
 
 bp = Blueprint('root', __name__, template_folder='./template')
@@ -19,7 +20,7 @@ class RootView(BaseView):
 
 
 @register_route(bp, '/query')
-class QueryView(BaseView):
+class RootQueryView(BaseView):
     def get(self, callsign: str):
         if not callsign:
             raise BadRequestException('Callsign not specified')
@@ -59,3 +60,24 @@ class QueryView(BaseView):
             name = safe_get(data, 'name', 'full', default='').strip()
 
         return name
+
+
+@register_route(bp, '/statistics')
+class RootStatisticsView(BaseView):
+    def get(self):
+        data = query_statistics_latest()
+
+        if not data:
+            raise NotFoundException()
+
+        statistics = [data]
+
+        if self.is_html_requested:
+            for stat in statistics:
+                for item in stat['data']:
+                    if item['type'] == 'active_licenses_by_state' and item['state'] is None:
+                        item['state'] = ''
+
+            return self.render_template('statistics.html', statistics=statistics)
+
+        return data
