@@ -12,10 +12,10 @@ bp = Blueprint('root', __name__, template_folder='./template')
 @register_route(bp, '/')
 class RootView(BaseView):
     def get(self):
-        if not self.is_html_requested:
-            raise NotFoundException()
+        if self.is_html_requested:
+            return self.render_template('root.html')
 
-        return 'Hello World'
+        raise NotFoundException()
 
 
 @register_route(bp, '/query')
@@ -30,7 +30,7 @@ class QueryView(BaseView):
             raise NotFoundException(f'Callsign {callsign!r} not found.')
 
         if self.is_html_requested:
-            return self.render_template('callsign_basic_data.html', license=self._convert_for_html(data))
+            return self.render_template('query.html', license=self._convert_for_html(data))
 
         return data
 

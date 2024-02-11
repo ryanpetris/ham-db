@@ -1,76 +1,62 @@
 #!/usr/bin/env python3
 
 import json
-from typing import Callable, Tuple, Union
+from typing import Union
 
 import yaml
 from dict2xml import Converter as XmlConverter
 from flask.wrappers import Response
 
-from .constants import CONTENT_TYPE_JSON, CONTENT_TYPE_YAML, CONTENT_TYPE_XML, DEFAULT_CHARSET
+from .constants import DEFAULT_CHARSET
+from .contenttype import ContentType
 from .exceptions import WebException
-from .headers import get_header_preference
+from .template import render_template
 from ...common import clean_null_fields
 
 
-class _Serializer:
-    @classmethod
-    def serialize(cls, data: Union[dict[any, any], list[any], any]) -> Tuple[str, str]:
-        serializer = cls._find_serializer()
-        result = clean_null_fields(data)
+def _serialize_json(data: Union[dict[any, any], list[any], any]) -> str:
+    return json.dumps(data, sort_keys=True)
 
-        return serializer(result)
 
-    @classmethod
-    def _find_serializer(cls) -> Callable[[Union[dict[any, any], list[any], any]], tuple[str, str]]:
-        content_type = get_header_preference(CONTENT_TYPE_JSON, CONTENT_TYPE_YAML, CONTENT_TYPE_XML)
+def _serialize_yaml(data: Union[dict[any, any], list[any], any]) -> str:
+    return yaml.safe_dump(data, sort_keys=True)
 
-        if content_type == CONTENT_TYPE_JSON:
-            return cls._serialize_json
 
-        if content_type == CONTENT_TYPE_YAML:
-            return cls._serialize_yaml
-
-        if content_type == CONTENT_TYPE_XML:
-            return cls._serialize_xml
-
-        return cls._serialize_json
-
-    @staticmethod
-    def _serialize_json(data: Union[dict[any, any], list[any], any]) -> tuple[str, str]:
-        return json.dumps(data, sort_keys=True), f'{CONTENT_TYPE_JSON}; charset={DEFAULT_CHARSET}'
-
-    @staticmethod
-    def _serialize_yaml(data: Union[dict[any, any], list[any], any]) -> tuple[str, str]:
-        return yaml.safe_dump(data, sort_keys=True), f'{CONTENT_TYPE_YAML}; charset={DEFAULT_CHARSET}'
-
-    @staticmethod
-    def _serialize_xml(data: Union[dict[any, any], list[any], any]) -> tuple[str, str]:
-        converter = XmlConverter(indent=None, newlines=None)
-        return converter.build({'result': data}), f'{CONTENT_TYPE_XML}; charset={DEFAULT_CHARSET}'
+def _serialize_xml(data: Union[dict[any, any], list[any], any]) -> str:
+    converter = XmlConverter(indent=None, newlines=None)
+    return converter.build({'result': data})
 
 
 def serializer_wrapper(func: callable):
     def decorator(*args, **kwargs):
         status_code = 200
+        content_type = ContentType.get_header_preference() or ContentType.JSON
 
         try:
-            data = func(*args, **kwargs)
+            response = func(*args, **kwargs)
         except WebException as ex:
             status_code = ex.status_code
-
-            data = {
+            response = {
                 'error': {
                     'code': ex.status_code,
                     'message': ex.message
                 }
             }
 
-        if data is None or isinstance(data, (str, bytes, Response)):
-            return data
+            if content_type == ContentType.HTML:
+                response = render_template('error.html', error=response['error'])
 
-        result, content_type = _Serializer.serialize(data)
+        if response is not None and not isinstance(response, (str, bytes, Response)):
+            response = clean_null_fields(response)
 
-        return Response(response=result, content_type=content_type, status=status_code)
+            if content_type == ContentType.JSON:
+                response = _serialize_json(response)
+            elif content_type == ContentType.YAML:
+                response = _serialize_yaml(response)
+            elif content_type == ContentType.XML:
+                response = _serialize_xml(response)
+
+        return Response(response=response, content_type=f'{content_type.get_type_header()}; charset={DEFAULT_CHARSET}',
+                        status=status_code)
 
     return decorator

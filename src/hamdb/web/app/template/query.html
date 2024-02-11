@@ -1,0 +1,142 @@
+{% extends 'master.html' %}
+
+{% macro render_badge(type, text) -%}
+    <span class="align-text-bottom badge badge-{{ type }}" style="margin: 0 0.25rem">{{ text }}</span>
+{%- endmacro %}
+
+{% macro render_info_row(title, data) -%}
+    <div class="row">
+        <div class="col-4 text-right font-weight-bold">{{ title }}</div>
+        <div class="col-8">{{ data }}</div>
+    </div>
+{%- endmacro %}
+
+{% macro render_info_row_block(title) -%}
+    {{ render_info_row(title, caller()) }}
+{%- endmacro %}
+
+{% macro render_license(license) %}
+    <div class="card" style="margin-top: 1rem">
+        <div class="card-body">
+            <h2 class="card-title font-weight-bold" style="margin-bottom: 1.25rem;">
+                {{ license.callsign }}
+
+                {% for qual in license.license.qualifications -%}
+                    {%- if qual == 'FCC:AMATEUR_EXTRA' -%}
+                        {{ render_badge('dark', 'Amateur Extra') }}
+                    {%- elif qual == 'FCC:ADVANCED' -%}
+                        {{ render_badge('primary', 'Advanced') }}
+                    {%- elif qual == 'FCC:GENERAL' -%}
+                        {{ render_badge('primary', 'General') }}
+                    {%- elif qual == 'FCC:TECHNICIAN_PLUS' -%}
+                        {{ render_badge('success', 'Technician Plus') }}
+                    {%- elif qual == 'FCC:TECHNICIAN' -%}
+                        {{ render_badge('success', 'Technician') }}
+                    {%- elif qual == 'FCC:NOVICE' -%}
+                        {{ render_badge('success', 'Novice') }}
+                    {%- elif qual == 'ISED:BASIC' -%}
+                        {{ render_badge('success', 'Basic') }}
+                    {%- elif qual == 'ISED:5WPM' -%}
+                        {{ render_badge('primary', '5 WPM') }}
+                    {%- elif qual == 'ISED:12WPM' -%}
+                        {{ render_badge('primary', '12 WPM') }}
+                    {%- elif qual == 'ISED:ADVANCED' -%}
+                        {{ render_badge('dark', 'Advanced') }}
+                    {%- elif qual == 'ISED:BASIC_HONOURS' -%}
+                        {{ render_badge('primary', 'Basic with Honours') }}
+                    {%- endif -%}
+                {%- endfor %}
+
+                {%- if license.license.entity_type == 'CLUB' -%}
+                    {{ render_badge('danger', 'Club') }}
+                {%- elif license.license.entity_type == 'GOVERNMENT' -%}
+                    {{ render_badge('danger', 'Government') }}
+                {%- elif license.license.entity_type == 'MILITARY' -%}
+                    {{ render_badge('danger', 'Military') }}
+                {%- elif license.license.entity_type == 'RACES' -%}
+                    {{ render_badge('danger', 'RACES') }}
+                {%- endif -%}
+            </h2>
+
+            <div class="row">
+                <div class="col-lg-6 col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title text-center font-weight-bold">Information</h5>
+                            {{ render_info_row('Name', license.name) }}
+                            {{ render_info_row('Callsign', license.callsign) }}
+                            {{ render_info_row('Authority', license.license.authority) }}
+                            {{ render_info_row('Expiration Date', license.license.expiration_date) }}
+
+                            {% call render_info_row_block('Address') %}
+                                {% if license.address.line1 -%}
+                                    {{ license.address.line1 }}<br/>
+                                {%- endif %}
+                                {% if license.address.line2 -%}
+                                    {{ license.address.line2 }}<br/>
+                                {%- endif %}
+                                {% if license.address.city -%}
+                                    {{ license.address.city }},
+                                {%- endif %}
+                                {% if license.address.state -%}
+                                    {{ license.address.state }}
+                                {%- endif %}
+                                {% if license.address.zip -%}
+                                    {{ license.address.zip }}
+                                {%- endif %}
+                            {% endcall %}
+                        </div>
+                    </div>
+                </div>
+                <div class="w-100 d-block d-lg-none">
+                    &nbsp;
+                </div>
+                <div class="col-lg-6 col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title text-center font-weight-bold">Identifiers</h5>
+                            {% if license.extra_data.dmr_ids -%}
+                                {% call render_info_row_block('DMR ID' + ('s' if license.extra_data.dmr_ids|length > 1 else '')) %}
+                                    {% for dmr_id in license.extra_data.dmr_ids -%}
+                                        {{ dmr_id }} <br/>
+                                    {%- endfor %}
+                                {% endcall %}
+                            {%- endif %}
+                            {% if license.extra_data.nxdn_ids -%}
+                                {% call render_info_row_block('NXDN ID' + ('s' if license.extra_data.nxdn_ids|length > 1 else '')) %}
+                                    {% for nxdn_id in license.extra_data.nxdn_ids -%}
+                                        {{ nxdn_id }} <br/>
+                                    {%- endfor %}
+                                {% endcall %}
+                            {%- endif %}
+                            {% if license.extra_data.frn -%}
+                                {{ render_info_row('FCC FRN', license.extra_data.frn) }}
+                            {%- endif %}
+                            {% if license.extra_data.licensee_id -%}
+                                {{ render_info_row('FCC LID', license.extra_data.licensee_id) }}
+                            {%- endif %}
+                            {% if license.extra_data.unique_system_identifier -%}
+                                {{ render_info_row('FCC UID', license.extra_data.unique_system_identifier) }}
+                            {%- endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+{% block title %}{{ license.callsign }} License{% endblock %}
+
+{% block content %}
+    {{ render_license(license) }}
+
+    {% if license.administrators|length > 0 -%}
+        <h2 style="margin: 1.25rem 0;">Administrators</h2>
+        {% for administrator in license.administrators -%}
+            {{ render_license(administrator) }}
+        {%- endfor %}
+    {%- endif %}
+
+    {% include 'include/callsign_form.html' %}
+{% endblock %}

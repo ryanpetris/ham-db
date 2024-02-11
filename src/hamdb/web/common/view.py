@@ -6,13 +6,10 @@ from typing import Callable, Optional, Tuple
 from flask import request, render_template
 from flask.globals import current_app
 from flask.views import MethodView, http_method_funcs
-from flask.wrappers import Response
 from jinja2.environment import Template
-from werkzeug.exceptions import MethodNotAllowed
 
-from .constants import CONTENT_TYPE_JSON, CONTENT_TYPE_YAML, CONTENT_TYPE_HTML
-from .exceptions import NotFoundException
-from .headers import get_header_preference
+from .contenttype import ContentType
+from .exceptions import BadRequestException, NotFoundException
 from .serializer import serializer_wrapper
 from ...common import map_lower, keys_lower
 from ...common.settings import SITE_NAME
@@ -56,19 +53,14 @@ class BaseView(MethodView):
 
     @property
     def is_html_requested(self) -> bool:
-        return get_header_preference(
-            CONTENT_TYPE_HTML,
-            CONTENT_TYPE_JSON,
-            CONTENT_TYPE_YAML,
-            CONTENT_TYPE_YAML
-        ) == CONTENT_TYPE_HTML
+        return ContentType.get_header_preference() == ContentType.HTML
 
     @serializer_wrapper
-    def dispatch_request(self, **kwargs) -> Response:
+    def dispatch_request(self, **kwargs) -> any:
         func = _get_func_for_method(self, request.method)
 
         if not func and request.method == 'HEAD':
-            func = _get_func_for_method(self, 'HEAD')
+            func = _get_func_for_method(self, 'GET')
 
         if not func:
             raise NotFoundException(f"Method {request.method!r} not implemented.")
@@ -76,7 +68,7 @@ class BaseView(MethodView):
         args, missing = _extract_arguments_for_method(func, kwargs)
 
         if missing:
-            raise MethodNotAllowed()
+            raise BadRequestException(f'Missing required arguments: {", ".join(missing)}')
 
         return current_app.ensure_sync(func)(**args)
 
