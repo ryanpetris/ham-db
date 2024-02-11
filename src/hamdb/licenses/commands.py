@@ -8,5 +8,8 @@ from ..db import SqlConnection
 def repopulate_licenses():
     eprint('Repopulating license database...')
 
-    with LicensesAdapter(SqlConnection(readonly=False)) as licenses:
+    sql = SqlConnection(readonly=False)
+    sql.init()
+
+    with LicensesAdapter(sql) as licenses:
         licenses.repopulate()
