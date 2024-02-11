@@ -24,6 +24,7 @@ class QueryView(BaseView):
         if not callsign:
             raise BadRequestException('Callsign not specified')
 
+        callsign = callsign.upper()
         data = query_basic_data(callsign)
 
         if not data:

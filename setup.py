@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 NAME = 'hamdb'
-VERSION = '0.1.4'
+VERSION = '0.1.5'
 DESCRIPTION = 'Ham Database CLI and API'
 LONG_DESCRIPTION = 'Database of Amateur Radio Licensee Information'
 AUTHOR = 'Ryan Petris'
