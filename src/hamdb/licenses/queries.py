@@ -11,8 +11,9 @@ def query_basic_data(callsign: str = None) -> Optional[dict[str, any]]:
     if not callsign:
         return None
 
-    with LicensesAdapter(SqlConnection()) as licenses:
-        data = licenses.query_callsign_one(callsign)
+    with SqlConnection() as sql:
+        with LicensesAdapter(sql) as licenses:
+            data = licenses.query_callsign_one(callsign)
 
     if not data:
         return None

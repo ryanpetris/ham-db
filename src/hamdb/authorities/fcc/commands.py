@@ -15,15 +15,16 @@ FCC_LICENSE_FILE_LAST_DATE_SETTING: str = 'fcc_license_file_last_date'
 
 def run_import(args: list[str]):
     full_import = len(args) >= 1 and args[0] == 'full'
-    sql = SqlConnection(readonly=False)
-    sql.init()
-    did_anything = False
 
-    if full_import or not sql.schema_exists(DB_SCHEMA_FCC):
-        _process_full_file(sql)
-        did_anything = True
+    with SqlConnection(readonly=False) as sql:
+        sql.init()
+        did_anything = False
 
-    return _process_daily_file(sql) or did_anything
+        if full_import or not sql.schema_exists(DB_SCHEMA_FCC):
+            _process_full_file(sql)
+            did_anything = True
+
+        return _process_daily_file(sql) or did_anything
 
 
 def _insert_rows(fcc: FccAdapter, rows: Iterable[list[str]]):

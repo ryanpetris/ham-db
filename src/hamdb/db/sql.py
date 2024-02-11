@@ -41,6 +41,9 @@ class SqlConnection:
         if not self._readonly:
             self.commit()
 
+        self._conn.close()
+        self._conn = None
+
     def _throw_if_readonly(self):
         if self._readonly:
             raise SqlReadOnlyException()

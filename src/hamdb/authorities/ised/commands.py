@@ -13,10 +13,11 @@ ISED_LICENSE_FILE_LAST_DATE_SETTING: str = 'ised_license_file_last_date'
 
 def run_import(args: list[str]):
     force_download = len(args) >= 1 and args[0] == 'full'
-    sql = SqlConnection(readonly=False)
-    sql.init()
 
-    return _process_full_file(sql, force_download=force_download)
+    with SqlConnection(readonly=False) as sql:
+        sql.init()
+
+        return _process_full_file(sql, force_download=force_download)
 
 
 def _insert_rows(ised: IsedAdapter, rows: Iterable[dict[str, str]]):
