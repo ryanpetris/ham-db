@@ -5,6 +5,33 @@
           integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 </head>
 <body>
+<header class="p-3 bg-dark text-white">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+                {{ config.site_name }}
+            </a>
+
+            <ul class="nav col-12 col-lg-auto mx-lg-auto mb-2 justify-content-center mb-lg-0">
+                <li><a href="/" class="nav-link px-2 text-white">Query</a></li>
+                <li><a href="/statistics" class="nav-link px-2 text-white">Statistics</a></li>
+                <li><a href="https://github.com/ryanpetris/ham-db" class="nav-link px-2 text-white">GitHub</a></li>
+            </ul>
+
+            <form class="col-12 col-lg-auto mb-3 mb-lg-0" action="/query" method="GET">
+                <div class="row g-2 justify-content-center">
+                    <div class="col-auto">
+                        <input type="search" name="callsign" class="form-control form-control-dark"
+                               placeholder="Callsign" aria-label="Callsign Search">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-outline-light">Query</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</header>
 <div class="container">
     {% block content %} {% endblock %}
 </div>
