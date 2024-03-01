@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
-from typing import Optional
-
 from ...common import map_lower
 
 
-def get_header_preference(*prefs: str) -> Optional[str]:
+def get_header_preference(*prefs: str) -> str | None:
     content_types = _get_accept_header_values()
     prefs_lower_map = map_lower(prefs)
 

@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
-from typing import Optional
-
 from ...common import DataConverter
 
 
 class FccDataConverter(DataConverter):
     @classmethod
-    def convert_qualification(cls, value: Optional[str]) -> Optional[str]:
+    def convert_qualification(cls, value: str | None) -> str | None:
         if not value:
             return None
 

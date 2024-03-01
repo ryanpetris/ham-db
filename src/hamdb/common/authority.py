@@ -3,7 +3,6 @@
 import importlib
 import os
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from .converter import DataConverter
 
@@ -23,16 +22,16 @@ class Authority(ABC):
 
     @property
     @abstractmethod
-    def data_converter(self) -> Optional[type[DataConverter]]:
+    def data_converter(self) -> type[DataConverter] | None:
         pass
 
     @property
-    def sync_priority(self) -> Optional[int]:
+    def sync_priority(self) -> int | None:
         return 0
 
     @property
     @abstractmethod
-    def sync_sql_command(self) -> Optional[str]:
+    def sync_sql_command(self) -> str | None:
         pass
 
     @abstractmethod

@@ -5,7 +5,7 @@ import shutil
 import tempfile
 import urllib.request
 from datetime import datetime
-from typing import IO, Optional, Union
+from typing import IO
 
 from .util import datetime_to_iso_datetime, iso_datetime_to_datetime, last_modified_date_to_datetime
 
@@ -24,7 +24,7 @@ class DownloadFile:
         self._file: IO[bytes] = file
 
 
-def download_file(url: str, only_after: Union[datetime, str, None] = None) -> Optional[DownloadFile]:
+def download_file(url: str, only_after: datetime | str | None = None) -> DownloadFile | None:
     if only_after and isinstance(only_after, str):
         only_after = iso_datetime_to_datetime(only_after)
 

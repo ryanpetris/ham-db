@@ -2,12 +2,11 @@
 
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import Optional
 
 
 class DataConverter(ABC):
     @classmethod
-    def convert_date(cls, value: Optional[date]):
+    def convert_date(cls, value: date | None):
         if not value:
             return None
 
@@ -17,7 +16,7 @@ class DataConverter(ABC):
         return value
 
     @classmethod
-    def convert_entity_type(cls, value: Optional[str]) -> Optional[str]:
+    def convert_entity_type(cls, value: str | None) -> str | None:
         if not value:
             return None
 
@@ -42,11 +41,11 @@ class DataConverter(ABC):
 
     @classmethod
     @abstractmethod
-    def convert_qualification(cls, value: Optional[str]) -> Optional[str]:
+    def convert_qualification(cls, value: str | None) -> str | None:
         raise Exception('abstract method')
 
     @classmethod
-    def convert_status(cls, value: Optional[str]) -> Optional[str]:
+    def convert_status(cls, value: str | None) -> str | None:
         if not value:
             return None
 

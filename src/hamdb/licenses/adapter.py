@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from typing import Optional
-
 from .sql_queries import cmd_init, cmd_license_query, cmd_stats_query
 from ..common import eprint, get_known_authority_codes, get_authority
 from ..db import SqlConnection
@@ -19,7 +17,7 @@ class LicensesAdapter:
         if not self._conn.readonly:
             self._conn.commit()
 
-    def query_callsign(self, *args: str, **kwargs: any) -> Optional[list[dict[str, any]]]:
+    def query_callsign(self, *args: str, **kwargs: any) -> list[dict[str, any]] | None:
         if not args:
             return None
 
@@ -42,7 +40,7 @@ class LicensesAdapter:
 
         return licenses
 
-    def query_callsign_one(self, callsign: str) -> Optional[dict[str, any]]:
+    def query_callsign_one(self, callsign: str) -> dict[str, any] | None:
         result = self.query_callsign(callsign)
 
         if not result:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from decimal import Decimal
-from typing import TYPE_CHECKING, Iterable, Optional
+from typing import TYPE_CHECKING, Iterable
 
 import psycopg
 import psycopg.conninfo
@@ -84,12 +84,12 @@ class SqlConnection:
 
                 yield data
 
-    def fetch_one(self, command: str, **kwargs) -> Optional[dict[str, any]]:
+    def fetch_one(self, command: str, **kwargs) -> dict[str, any] | None:
         result = self.fetch(command, **kwargs)
 
         return next(iter(result), None)
 
-    def get_setting(self, name: str) -> Optional[str]:
+    def get_setting(self, name: str) -> str | None:
         result = self.fetch_one('SELECT value FROM settings WHERE name = %(name)s', name=name)
 
         return result and result['value']

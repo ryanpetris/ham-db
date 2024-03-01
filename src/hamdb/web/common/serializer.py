@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import json
-from typing import Union
 
 import yaml
 from dict2xml import Converter as XmlConverter
@@ -14,15 +13,15 @@ from .template import render_template
 from ...common import clean_null_fields
 
 
-def _serialize_json(data: Union[dict[any, any], list[any], any]) -> str:
+def _serialize_json(data: dict[any, any] | list[any] | any) -> str:
     return json.dumps(data, sort_keys=True, default=str)
 
 
-def _serialize_yaml(data: Union[dict[any, any], list[any], any]) -> str:
+def _serialize_yaml(data: dict[any, any] | list[any] | any) -> str:
     return yaml.safe_dump(data, sort_keys=True)
 
 
-def _serialize_xml(data: Union[dict[any, any], list[any], any]) -> str:
+def _serialize_xml(data: dict[any, any] | list[any] | any) -> str:
     converter = XmlConverter(indent=None, newlines=None)
     return converter.build({'result': data})
 

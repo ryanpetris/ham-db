@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from typing import Optional
-
 from .commands import run_import
 from .converter import IsedDataConverter
 from .sql_queries import cmd_license_insert
@@ -18,11 +16,11 @@ class Authority(BaseAuthority):
         return 'ISED'
 
     @property
-    def data_converter(self) -> Optional[type[DataConverter]]:
+    def data_converter(self) -> type[DataConverter] | None:
         return IsedDataConverter
 
     @property
-    def sync_sql_command(self) -> Optional[str]:
+    def sync_sql_command(self) -> str | None:
         return cmd_license_insert
 
     def run_import(self, args: list[str]):

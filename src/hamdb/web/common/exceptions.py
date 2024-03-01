@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
 
-from typing import Optional
-
-
 class WebException(Exception):
     @property
     def status_code(self) -> int:
@@ -20,10 +17,10 @@ class WebException(Exception):
 
 
 class BadRequestException(WebException):
-    def __init__(self, message: Optional[str] = None):
+    def __init__(self, message: str | None = None):
         super().__init__(400, message or 'Bad Request')
 
 
 class NotFoundException(WebException):
-    def __init__(self, message: Optional[str] = None):
+    def __init__(self, message: str | None = None):
         super().__init__(404, message or 'Not Found')

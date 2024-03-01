@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from typing import Optional
-
 from .sql_queries import cmd_full_init
 from ...common.settings import DB_SCHEMA_ISED
 from ...db import SqlConnection
@@ -33,7 +31,7 @@ class IsedAdapter:
     def clear_schema(self):
         self._conn.execute(cmd_full_init)
 
-    def find_individual(self, first_name: str, last_name: str, postal_code: str) -> Optional[dict[str, any]]:
+    def find_individual(self, first_name: str, last_name: str, postal_code: str) -> dict[str, any] | None:
         return self._conn.fetch_one(
             f'SELECT * FROM {DB_SCHEMA_ISED}.licenses WHERE club_name IS NULL AND first_name = %(first_name)s AND surname = %(last_name)s AND postal_code = %(postal_code)s',
             first_name=first_name,
@@ -41,7 +39,7 @@ class IsedAdapter:
             postal_code=postal_code
         )
 
-    def get_callsign_data(self, callsign: str) -> Optional[dict[str, any]]:
+    def get_callsign_data(self, callsign: str) -> dict[str, any] | None:
         return self._conn.fetch_one(f'SELECT * FROM {DB_SCHEMA_ISED}.licenses WHERE callsign = %(callsign)s',
                                     callsign=callsign)
 

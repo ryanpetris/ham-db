@@ -5,7 +5,7 @@ import sys
 import time
 
 from datetime import datetime, timezone
-from typing import Iterable, Optional
+from typing import Iterable
 
 
 def eprint(*args, **kwargs):
@@ -41,21 +41,21 @@ def dump_json(data: any):
     return json.dumps(clean_null_fields(data), indent=4, default=str)
 
 
-def datetime_to_iso_datetime(date: datetime) -> Optional[str]:
+def datetime_to_iso_datetime(date: datetime) -> str | None:
     if date is None:
         return None
 
     return date.isoformat()
 
 
-def iso_datetime_to_datetime(date: str) -> Optional[datetime]:
+def iso_datetime_to_datetime(date: str) -> datetime | None:
     if date is None:
         return None
 
     return datetime.fromisoformat(date)
 
 
-def last_modified_date_to_datetime(date: str) -> Optional[datetime]:
+def last_modified_date_to_datetime(date: str) -> datetime | None:
     if date is None:
         return None
 
